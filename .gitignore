@@ -1,0 +1,13 @@
+node_modules/
+package-lock.json
+server/verify-config.js
+.env
+.netlify/
+*.log
+.DS_Store
+
+# internal working docs — keep these out of the public repo
+DESIGN_BRIEF.md
+ADVERSARIAL_REVIEW.md
+ADVERSARIAL_REVIEW_FINDINGS.md
+design/

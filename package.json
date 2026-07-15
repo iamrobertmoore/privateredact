@@ -1,0 +1,15 @@
+{
+  "name": "nillion-redact",
+  "version": "1.0.0",
+  "description": "Upload a document, choose what to redact, and download a redacted PDF. The whole thing runs in your browser; the only data that leaves the page is the text sent to Nillion **nilAI** for AI-assisted detection, which is processed inside a Trusted Execution Environment (TEE).",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

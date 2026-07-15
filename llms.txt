@@ -1,0 +1,18 @@
+# Private Redaction
+
+> A free web tool to redact sensitive information from documents in your browser, with cryptographic proof that the AI processing stayed private.
+
+Private Redaction blacks out sensitive details — names, emails, phone numbers, addresses, government IDs, card numbers, and any custom terms — in PDF, DOCX and TXT files. The document is opened and redacted entirely on the user's own device; the file is never uploaded. To find what is sensitive, the extracted text is analysed by Nillion's nilAI, a private LLM running inside an AMD SEV-SNP Trusted Execution Environment (TEE). Every run is verified against the enclave's hardware attestation and the response signature, so a user can confirm the processing was genuinely private rather than taking it on trust.
+
+## Key facts
+- Free, no sign-up, runs client-side in the browser.
+- Input: PDF, DOCX, TXT, MD. Output: a redacted PDF with the sensitive content truly removed, not just visually covered.
+- Privacy: the file stays on the device; only the extracted text is relayed, via the app's verifier, to the Nillion TEE.
+- Verifiable: displays an AMD SEV-SNP attestation result and a per-response signature check.
+- Built on Nillion nilAI (private LLM inference in a TEE).
+
+## Links
+- App: https://privateredact.app/
+- Terms of Use: https://privateredact.app/terms.html
+- Nillion private LLMs: https://docs.nillion.com/build/private-llms/overview
+- About Nillion: https://nillion.com

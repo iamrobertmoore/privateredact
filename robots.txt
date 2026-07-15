@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /server/
+Disallow: /test/
+Disallow: /design/
+Disallow: /netlify/
+
+Sitemap: https://privateredact.app/sitemap.xml
