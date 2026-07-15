@@ -1,94 +1,78 @@
-# Private Redaction (MVP)
+<p align="center">
+  <img src="og-image.png" alt="Private Redaction" width="640">
+</p>
 
-Upload a document, choose what to redact, and download a redacted PDF. The whole thing runs in your browser; the only data that leaves the page is the text sent to Nillion **nilAI** for AI-assisted detection, which is processed inside a Trusted Execution Environment (TEE).
+<h1 align="center">Private Redaction</h1>
 
-This is an early MVP with deliberately neutral styling so the UX can be nailed before any branding.
+<p align="center">
+  Redact sensitive information from documents in your browser — with cryptographic proof the AI that scanned them ran privately.
+</p>
 
-## Why this is private
+<p align="center">
+  <a href="https://privateredact.app"><b>privateredact.app</b></a>
+</p>
 
-- **No backend.** The app is three static files (`index.html`, `styles.css`, `app.js`). When hosted on Netlify, GitHub Pages, S3/CloudFront, etc., there is no server of ours in the path, so no server we control ever receives your document.
-- **Extraction, redaction and PDF generation happen locally** in the browser (pdf.js, mammoth, pdf-lib).
-- **AI detection is the only network call**, and it goes to nilAI, where inference runs in a hardware-isolated TEE. The key is set by the site owner in `config.js` (see the security note below).
-- **Real redaction, not black boxes over live text.** For PDFs, each page is rendered to an image, black boxes are painted over the sensitive spans, and the PDF is rebuilt from those images — so the output contains no text objects at all and nothing can be copied back out. For DOCX/TXT the text is rebuilt with redacted spans removed. Either way there is no hidden layer.
+---
+
+Private Redaction blacks out names, emails, phone numbers, addresses, IDs, card numbers and any custom terms in PDF, DOCX and TXT files. Your document is opened and redacted **entirely on your own device** — the file is never uploaded. To find what's sensitive, the extracted text is analysed by a private AI running inside a hardware-sealed enclave, and every run is verified against that enclave's attestation. So instead of trusting a promise that your document stayed private, you get to check it.
+
+Free, no sign-up, runs in the browser.
+
+## Why it's private
+
+- **The file never leaves your device.** Extraction, redaction and PDF generation all happen client-side. Only the extracted *text* is sent for analysis — the document itself is never uploaded.
+- **The AI runs in a sealed enclave.** Detection is performed by [Nillion nilAI](https://docs.nillion.com/build/private-llms/overview), a private LLM running inside an AMD SEV-SNP Trusted Execution Environment — hardware that the operator, the model host and the cloud provider cannot see into.
+- **Verifiable, not asserted.** Every run is checked against the enclave's hardware attestation and a per-response signature, and the result is shown alongside your redaction.
+- **Real redaction.** Redacted content is removed from the output, not just visually covered — there is no hidden text layer to recover.
 
 ## How it works
 
 ```
-File ──▶ extract text (browser) ──▶ detect ──▶ review/adjust ──▶ rebuild PDF (browser) ──▶ download
-                                      │
-                                      ├─ rule-based regex (email, phone, SSN, cards, IPs, URLs, dates) — 100% local
-                                      ├─ nilAI in a TEE (names, orgs, addresses, free-text instructions)
-                                      └─ your own literal terms
+Browser
+  file ──(read locally; never uploaded)──▶ extracted text
+  text ──▶ verifier (serverless) ──▶ private LLM in a TEE   ← detection happens in the enclave
+                    │  verifies the response signature (secp256k1)
+                    │  verifies the SEV-SNP attestation (AMD certificate chain)
+                    ◀── detected items + verification result
+  redact + rebuild the PDF locally, show the preview + verification
 ```
 
-## Running locally
+Text detection uses a mix of local pattern rules (emails, phone numbers, card numbers, IDs, etc.) and the private LLM (names, organisations, addresses, and free-text instructions). The verifier is a small serverless function that holds the API credential server-side and runs a dependency-free AMD SEV-SNP attestation check; the browser only ever calls it, never the model directly.
 
-Two parts: the **verifier** (a small Node server that proves the TEE and holds the key) and the **static app**.
+## What the verification checks
 
-**1. Start the verifier**
-```bash
-cd nillion-redact
-cp server/verify-config.example.js server/verify-config.js   # add your nilAI key
-node server/verify.js                                        # http://localhost:8787
-```
+- **Response signature** — the specific response was signed inside the enclave (secp256k1 ECDSA), verified against the enclave's public key.
+- **Enclave attestation** — the AMD SEV-SNP attestation report is verified against AMD's certificate chain (root → intermediate → chip key), along with the report signature, the firmware/TCB versions, that debug mode is off, the launch measurement, and that the report is bound to the live session.
 
-**2. Serve the app** (another terminal). pdf.js needs a real `http://` origin, so don't open the file directly:
-```bash
-python3 -m http.server 8000     # open http://localhost:8000
-```
+## Redaction output
 
-`config.js` (gitignored) points `proxyUrl` at the verifier. When it's running, every AI-detection run is cryptographically checked and the app shows a **"Processed in a verified TEE"** panel with the evidence. If the verifier isn't running, the app falls back to a direct nilAI call using the `apiKey` in `config.js` and clearly marks the run as **not** independently verified.
+- **PDF:** each page is rendered to an image, opaque boxes are painted over the sensitive spans, and the PDF is rebuilt from those images — the output contains no text objects, so nothing can be copied back out.
+- **DOCX / TXT:** rebuilt as a clean PDF with the redacted spans removed.
 
-## What the verification proves
+## Run your own
 
-The verifier reuses the exact, tested checks from the `n8n-nodes-nilai` package and returns the result to the browser:
+The frontend is static and the verifier runs as a serverless function, so the model credential stays server-side and the browser only calls `/api/verify` on the same origin.
 
-- **Response signature (`tee_verified`)** — the specific response was signed inside the enclave (secp256k1 ECDSA), verified against the enclave's public key.
-- **Enclave attestation (`attestation_verified`)** — the AMD SEV-SNP hardware attestation report is verified against AMD's certificate chain (ARK→ASK→VCEK), the report signature, the TCB values, debug-disabled, the launch measurement, and binding to the live TLS session.
+You'll need a Nillion nilAI API key. Then, on Netlify (or any host with serverless functions):
 
-So the user sees proof, not a promise. The panel shows each sub-check and the raw evidence.
+1. Deploy the repo. `netlify.toml` sets the publish and functions directories and the `/api/verify` route.
+2. Set `NILAI_API_KEY` as an environment variable (the only secret; it never reaches the browser).
+3. Set `ALLOWED_ORIGIN` to your site's origin(s) so the verifier isn't an open proxy.
 
-## Deploy it (Netlify)
+For local development, `netlify dev` serves the site and the function together; put your key in a local `.env`.
 
-The frontend is static and the verifier runs as a Netlify Function, so the nilAI key stays server-side and the browser only ever calls `/api/verify` on the same origin. `config.js` contains no secret.
+## Notes & limitations
 
-1. Push the repo to GitHub and "Add new site → Import from Git" in Netlify (or run `netlify deploy`). `netlify.toml` sets the publish dir and functions dir.
-2. In Netlify → Site settings → Environment variables, add **`NILAI_API_KEY`** (a freshly rotated nilAI key). That's the only place the key lives.
-3. Deploy. The verifier is live at `/api/verify`; the app uses it automatically and shows the "Verified in a TEE" panel on each run.
+- **Automated redaction is not infallible.** It can miss things or over-cover; always review the preview before relying on or sharing the output.
+- **The text is relayed to reach the enclave.** The file stays on your device, but the extracted text passes through the app's own verifier on its way to the enclave. The sealed, unreadable property is a guarantee about the enclave, not that relay.
+- **PDF output is image-based**, so the redacted document's text is no longer selectable or searchable — the trade-off that guarantees true removal.
+- This is an early, evolving tool provided **as is**, without warranty. See the [Terms of Use](https://privateredact.app/terms.html).
 
-Local dev with the same wiring:
-```bash
-npm i -g netlify-cli
-cp .env.example .env          # put your nilAI key in .env
-netlify dev                   # serves the site + the function at /api/verify
-```
+## Built with
 
-Notes:
-- **Rotate the key** before deploying; set it only in the Netlify env var (and local `.env`), never in `config.js`.
-- **Internal-only:** gate the site with Netlify's password protection / Netlify Identity (Site settings → Access control) so only your team can reach it.
-- **Function timeout:** the attestation makes a few outbound calls; the built-in cert cache keeps warm runs fast. If a cold run times out, raise the function timeout on your plan.
-- **Prefer AWS?** The same function code runs as a Lambda behind API Gateway, or you can run `node server/verify.js` on an EC2 box behind HTTPS and set `proxyUrl` in `config.js` to its URL.
+- [Nillion nilAI](https://docs.nillion.com/build/private-llms/overview) — private LLM inference inside a TEE
+- [pdf.js](https://mozilla.github.io/pdf.js/), [pdf-lib](https://pdf-lib.js.org/), [mammoth](https://github.com/mwilliamson/mammoth.js) — in-browser document handling
 
-## Known MVP limitations (intentional, for now)
+## License
 
-- **PDF output preserves the original layout but is image-based** (rendered pages, so the text is no longer selectable/searchable). This is the trade-off that guarantees true removal. DOCX/TXT still produce a reflowed text PDF.
-- **Redaction boxes on PDFs are positioned from pdf.js text coordinates** and are padded to cover cleanly; very unusual fonts/layouts could need a wider pad. Always eyeball the preview before downloading.
-- **Supported inputs:** PDF, DOCX, TXT, MD. Scanned images / OCR are not handled yet.
-- **Large documents** are truncated for the AI step (first ~15k characters); rule-based detection still covers the whole document.
-- **No attestation UI yet.** The verification work from the n8n node can be ported here later to show a "provably private" badge on the result.
-- **Third-party libraries load from a CDN.** For a trust-critical production build, vendor them locally so nothing but your own code runs.
-
-## Files
-
-| File | Purpose |
-|---|---|
-| `index.html` | App shell and UI |
-| `styles.css` | Neutral styling |
-| `app.js` | Extraction, detection, review, PDF generation |
-| `config.js` | Frontend config: verifier URL / fallback key (gitignored) |
-| `config.example.js` | Template to copy to `config.js` |
-| `server/verify.js` | Local verification server (calls nilAI, checks signature + attestation) |
-| `server/nilai-verifier/attestation.js` | Reused SEV-SNP verifier from the n8n node |
-| `server/verify-config.js` | Server key (gitignored) |
-| `test/smoke.js` | Offline sanity checks for the pure logic |
-| `test/pdf.js` | End-to-end check that redacted text is unrecoverable |
+[MIT](LICENSE)
