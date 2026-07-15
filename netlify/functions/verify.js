@@ -40,18 +40,19 @@ function ctx() {
   } } };
 }
 
-// Restrict who can call this proxy. Set ALLOWED_ORIGIN (e.g. https://nilredact.netlify.app)
-// in the Netlify env to stop it being an open proxy to nilAI. Left blank (e.g. local dev) = allow all.
-const ALLOWED_ORIGIN = (process.env.ALLOWED_ORIGIN || '').replace(/\/+$/, '');
-const CORS = { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN || '*', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
+// Restrict who can call this proxy. Set ALLOWED_ORIGIN in the Netlify env to your site
+// origin(s), comma-separated (e.g. "https://privateredact.app,https://nilredact.netlify.app")
+// to stop it being an open proxy to nilAI. Left blank (e.g. local dev) = allow all.
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGIN || '').split(',').map((s) => s.trim().replace(/\/+$/, '')).filter(Boolean);
+const CORS = { 'Access-Control-Allow-Origin': ALLOWED_ORIGINS[0] || '*', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
 const json = (statusCode, obj) => ({ statusCode, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify(obj) });
 
 function originAllowed(event) {
-  if (!ALLOWED_ORIGIN) return true;
+  if (ALLOWED_ORIGINS.length === 0) return true;
   const h = event.headers || {};
   const origin = (h.origin || h.Origin || '').replace(/\/+$/, '');
   const referer = h.referer || h.Referer || '';
-  return origin === ALLOWED_ORIGIN || referer === ALLOWED_ORIGIN || referer.startsWith(ALLOWED_ORIGIN + '/');
+  return ALLOWED_ORIGINS.some((a) => origin === a || referer === a || referer.startsWith(a + '/'));
 }
 
 // Lightweight per-IP rate limit (per warm instance). For hard cross-instance
