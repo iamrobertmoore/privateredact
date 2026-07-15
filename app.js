@@ -198,7 +198,7 @@ async function aiCall(model, input, cfg) {
       }
       const d = await r.json();
       if (d.error) throw new Error(d.error);
-      return { text: d.text || '', verification: { mode: 'verified', tee_verified: d.tee_verified, attestation: d.attestation, signature: d.signature } };
+      return { text: d.text || '', verification: { mode: 'verified', tee_verified: d.tee_verified, attestation: d.attestation, signature: d.signature, receipt: d.receipt } };
     } catch (e) {
       if (cfg.apiKey) return { text: await directCall(model, input, cfg), verification: { mode: 'unavailable', reason: e.message } };
       throw e;
@@ -313,6 +313,34 @@ async function detect(useCache) {
 
 const LEARN_MORE = 'https://docs.nillion.com/build/private-llms/overview';
 
+// Build and download a verification receipt: the raw AMD SEV-SNP attestation evidence,
+// which proves the enclave is genuine and can be checked independently against AMD.
+// It contains nothing about the user's document.
+function downloadReceipt(v) {
+  const att = v.attestation || {};
+  const r = v.receipt || {};
+  const receipt = {
+    tool: 'Private Redaction',
+    what_this_is: 'Attestation evidence for the AMD SEV-SNP enclave that performed the AI detection. It proves the enclave is genuine and running the expected build, is verifiable independently against AMD, and reveals nothing about your document.',
+    verified_at: r.verified_at || new Date().toISOString(),
+    endpoint: r.endpoint || null,
+    processor: att.processor || null,
+    runtime: att.nilcc_version || null,
+    measurement: att.measurement || null,
+    measurement_matches_known_build: att.measurement_matches_known_build,
+    checks: att.checks || null,
+    enclave_public_key: r.enclave_public_key || null,
+    attestation_report_hex: r.attestation_report_hex || null,
+    environment: r.environment || null,
+    how_to_verify: 'This is an AMD SEV-SNP attestation report. Verify its certificate chain against AMD KDS (kdsintf.amd.com) and check the launch measurement. The verifier used here is open source: https://github.com/iamrobertmoore/privateredact (see server/nilai-verifier).',
+  };
+  const blob = new Blob([JSON.stringify(receipt, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'privateredact-attestation-receipt.json'; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
 function renderVerification(v) {
   const el = document.getElementById('verify');
   if (!v) { el.className = 'verify hidden'; el.innerHTML = ''; return; }
@@ -338,7 +366,7 @@ function renderVerification(v) {
       ? 'Your document was handled privately, and we can prove it.'
       : 'We could only partly verify this run.') + '</div>';
     html += '<p class="vsub">' + (full
-      ? 'The AI that read your text ran inside sealed hardware that not even Nillion or its cloud host can see into. We checked its hardware attestation on our verifier and it passed. The details are below.'
+      ? 'The AI that read your text ran inside sealed hardware that not even Nillion or its cloud host can see into. We checked its hardware attestation and it passed. The details, and a receipt you can verify yourself, are below.'
       : 'Some of the privacy checks didn’t pass this time. See the details below, and treat this result with caution.') + '</p>';
     html += '</div></div>';
 
@@ -370,11 +398,14 @@ function renderVerification(v) {
     for (const k of Object.keys(labels)) if (k in checks) rows += kv(labels[k], checks[k] ? '<span class="ok">✓</span>' : '✗');
     if (att.measurement) rows += kv('Measurement', escapeHtml(String(att.measurement).slice(0, 24)) + '…');
     if (v.signature) rows += kv('Signature', escapeHtml(String(v.signature).slice(0, 28)) + '…');
+    if (v.receipt && v.receipt.attestation_report_hex) rows += kv('Independent proof', '<a href="#" id="dl-receipt">download receipt ↓</a>');
     rows += kv('Learn more', '<a href="' + LEARN_MORE + '" target="_blank" rel="noopener">how this works ↗</a>');
     if (att.error) rows += kv('Attestation error', escapeHtml(att.error));
 
     html += '<details><summary><span class="chev">›</span> Technical detail</summary><div class="kvgrid">' + rows + '</div></details>';
     el.innerHTML = html;
+    const dl = document.getElementById('dl-receipt');
+    if (dl) dl.addEventListener('click', (e) => { e.preventDefault(); downloadReceipt(v); });
     return;
   }
 

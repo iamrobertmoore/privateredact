@@ -92,12 +92,18 @@ exports.handler = async (event) => {
     if (!r.ok) return json(502, { error: 'nilAI ' + r.status + ': ' + rawBody.slice(0, 200) });
     const parsed = JSON.parse(rawBody);
 
-    let teeVerified = false;
-    try { const pk = await (await fetch(BASE + '/v1/public_key')).json(); teeVerified = verifyNilaiSignature(rawBody, pk); } catch (e) {}
+    let publicKey = null, teeVerified = false;
+    try { publicKey = await (await fetch(BASE + '/v1/public_key')).json(); teeVerified = verifyNilaiSignature(rawBody, publicKey); } catch (e) {}
 
     let attestation;
     try { attestation = await verifyEnclaveAttestation(ctx(), BASE); }
     catch (e) { attestation = { attestation_verified: false, error: e.message }; }
+
+    // Raw attestation evidence for an independently-verifiable receipt. This proves the
+    // enclave is genuine; it contains nothing about the user's document.
+    let rawReport = null, environment = null;
+    try { const rr = await (await fetch(BASE + '/nilcc/api/v2/report')).json(); rawReport = rr.raw_report || null; environment = rr.environment || null; } catch (e) {}
+    const receipt = { verified_at: new Date().toISOString(), endpoint: BASE, enclave_public_key: publicKey, attestation_report_hex: rawReport, environment };
 
     const items = Array.isArray(parsed.output) ? parsed.output : [];
     const msg = items.find((o) => o && o.type === 'message') || items[0];
@@ -105,7 +111,7 @@ exports.handler = async (event) => {
     const part = cont.find((c) => c && c.type === 'output_text') || cont[0];
     const text = part && typeof part.text === 'string' ? part.text : '';
 
-    return json(200, { text, tee_verified: teeVerified, attestation, signature: parsed.signature || null, model: parsed.model || model });
+    return json(200, { text, tee_verified: teeVerified, attestation, signature: parsed.signature || null, model: parsed.model || model, receipt });
   } catch (e) {
     return json(500, { error: e.message });
   }
