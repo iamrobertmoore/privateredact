@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How to redact a Word document (properly) | Private Redaction</title>
+  <meta name="description" content="Word documents leak more than PDFs — tracked changes, comments, metadata and hidden text. Here's how to actually redact a .docx and verify nothing's left behind." />
+  <link rel="canonical" href="https://privateredact.app/blog/how-to-redact-a-word-document" />
+  <meta name="theme-color" content="#080B14" />
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Private Redaction" />
+  <meta property="og:title" content="How to redact a Word document (properly)" />
+  <meta property="og:description" content="Word files leak more than PDFs — tracked changes, comments, metadata, hidden text. How to actually redact a .docx and verify nothing's left behind." />
+  <meta property="og:url" content="https://privateredact.app/blog/how-to-redact-a-word-document" />
+  <meta property="og:image" content="https://privateredact.app/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="How to redact a Word document (properly)" />
+  <meta name="twitter:description" content="Tracked changes, comments, metadata, hidden text: how to actually redact a .docx and verify it." />
+  <meta name="twitter:image" content="https://privateredact.app/og-image.png" />
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BlogPosting","headline":"How to redact a Word document (properly)","description":"Word documents leak more than PDFs — tracked changes, comments, metadata and hidden text. How to actually redact a .docx and verify nothing's left behind.","image":"https://privateredact.app/og-image.png","mainEntityOfPage":"https://privateredact.app/blog/how-to-redact-a-word-document","publisher":{"@type":"Organization","name":"Private Redaction"}}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <a href="/" class="brand-mark"><span class="dot" aria-hidden="true"></span><span class="wordmark">Private Redaction</span></a>
+      <nav class="topnav"><a href="/">Redact</a> <a href="/blog/">Blog</a></nav>
+    </div>
+  </header>
+
+  <main>
+    <article class="prose">
+      <p class="meta">Guide · 6 min read</p>
+      <h1>How to redact a Word document (properly)</h1>
+      <p class="lede">A Word file leaks more than a PDF. Blacking out text is the least of it — the bigger risks are tracked changes, comments, metadata and hidden text you never see. Here's how to actually clean a .docx and check nothing's left behind.</p>
+
+      <p>PDFs get the headlines, but Word documents are the sneakier leak. A <code>.docx</code> isn't a flat page — it's an editable file with layers of history baked in. Delete a sentence and it can live on in tracked changes. "Black out" a name and the text underneath is still selectable. And the document quietly carries who wrote it, which organisation they work for, and sometimes earlier drafts.</p>
+
+      <h2>What's actually hiding in a .docx</h2>
+      <ul>
+        <li><strong>Tracked changes.</strong> If change-tracking was ever on, every deletion is still stored. "Deleting" sensitive text just marks it deleted — a recipient can show markup and read it.</li>
+        <li><strong>Comments.</strong> Reviewer notes, often more candid than the document itself.</li>
+        <li><strong>Document metadata.</strong> Author name, company, manager, template, total editing time, and revision history sit in the file properties.</li>
+        <li><strong>Hidden text.</strong> Word has a "hidden" formatting flag; text can be present but not shown.</li>
+        <li><strong>Embedded content and earlier versions.</strong> Linked objects, and in some workflows, autosaved or fast-saved remnants.</li>
+      </ul>
+
+      <h2>The methods that don't work</h2>
+      <ul>
+        <li><strong>Highlighting the text black, or dropping a black shape over it.</strong> Cosmetic only — the text is untouched and still copy-pasteable.</li>
+        <li><strong>Deleting the text and saving.</strong> Safe only if tracked changes was never on and you've cleared the metadata. Otherwise the "removed" text is recoverable.</li>
+        <li><strong>"Mark as Final."</strong> Does nothing to the content; it's a soft nudge, not protection.</li>
+        <li><strong>Password-protecting the file.</strong> Controls access, doesn't remove anything.</li>
+      </ul>
+
+      <h2>How to actually redact a Word document</h2>
+      <ol>
+        <li><strong>Resolve the history.</strong> Accept or reject all tracked changes (so nothing's stored as "deleted"), and delete every comment.</li>
+        <li><strong>Strip the metadata and hidden content.</strong> In Word: <em>File → Info → Check for Issues → Inspect Document</em>. The Document Inspector finds and removes properties, hidden text, comments and revision remnants. Run it and remove what you don't want to ship.</li>
+        <li><strong>Remove the sensitive text — and get it out of the editable format.</strong> This is the step people skip. Even after deleting text in a live <code>.docx</code>, editable files are the wrong format to trust for redaction. The reliable move is to remove the content and <strong>flatten</strong> the result: export a version where the sensitive text simply isn't in the file, and there's no editable layer to recover it from.</li>
+        <li><strong>Verify.</strong> Open the output and try to copy the redacted areas. If anything selects, you're not done.</li>
+      </ol>
+
+      <h2>The shortcut: extract, redact, flatten</h2>
+      <p>Because the editable format is the problem, the cleanest approach is to take the text out, redact it, and produce a flattened file with the sensitive content genuinely gone. <a href="https://privateredact.app">Private Redaction</a> does exactly that with a <code>.docx</code>: it reads the text, blacks out what you choose, and gives you back a <strong>PDF with the sensitive content removed</strong> — not just covered, and with no recoverable layer. It's a clean, redacted document rather than a pixel-perfect copy of your Word formatting, which is the right trade for something you're about to share.</p>
+      <p>Two things worth knowing: the whole thing runs <strong>in your browser</strong> (the file never leaves your device), and the step that needs AI — finding names, addresses and the like — runs inside a sealed, hardware-verified enclave, so that text isn't exposed to anyone in the process. One honest caveat: automated detection can miss things, so the copy-paste check on the output still matters.</p>
+
+      <h2>Don't forget the original</h2>
+      <p>Redacting a copy you share is only half the job. The <em>original</em> Word file still holds the metadata and history. If you're sending the Word file itself for any reason, inspect and clean it first — and where you can, send a flattened PDF instead of the live document.</p>
+
+      <h2>Takeaways</h2>
+      <ul>
+        <li>A Word file carries tracked changes, comments, metadata and hidden text — far more than what's on the page.</li>
+        <li>Black boxes and deletions in a live <code>.docx</code> are not reliable redaction.</li>
+        <li>Resolve the history, run Document Inspector, then remove the content and flatten it out of the editable format.</li>
+        <li>Always verify: copy-paste the redacted zones on the output.</li>
+      </ul>
+
+      <div class="cta">
+        <p style="margin:0"><a href="https://privateredact.app"><strong>Private Redaction</strong></a> handles Word documents: drop in a <code>.docx</code>, choose what to redact, and download a clean PDF with the sensitive content removed. Free, in your browser, with the AI step run in a verified private enclave.</p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="foot">
+    <p><a href="/">← Private Redaction</a> · <a href="/blog/">Blog</a> · <a href="/terms.html">Terms of Use</a></p>
+  </footer>
+  <!-- Cloudflare Web Analytics -->
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cea12a25aa994f2a81275b641a949553"}'></script>
+</body>
+</html>
