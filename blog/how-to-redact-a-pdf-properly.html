@@ -44,7 +44,7 @@
       <p class="lede">Most "redactions" leave the underlying text intact and copyable. Here's what actually works, where Adobe's tool trips people up, and how to check a redaction really stuck.</p>
 
       <p>Every few weeks, someone redacts a PDF wrong and it makes the news. Names buried under black bars that lift with a click. Account numbers any recipient can copy. Court filings where the "redacted" version turns out byte-for-byte identical to the original. The pattern is always the same: someone thought redaction meant covering the text up.</p>
-      <p>It doesn't. Redaction means <strong>removing</strong> the text. Covering it is just painting a black bar over a window — anyone can still look inside.</p>
+      <p>It doesn't. Redaction means <strong>removing</strong> the text. Covering it is just painting a black bar over a window, anyone can still look inside.</p>
       <p>This guide covers what redaction actually has to do, why the common methods fail, where Adobe's tool catches people out, and how to verify a redaction actually worked.</p>
 
       <h2>What "redacted" should mean</h2>
@@ -52,24 +52,24 @@
       <ol>
         <li>The text is not visible on the page.</li>
         <li>The text is not selectable, copy-pasteable, or searchable.</li>
-        <li>The text is not retrievable from the file in any way — copy, paste, search, OCR, or reading the PDF's underlying object structure.</li>
-        <li>The redacted zone is a permanent, flat marking — there's no "original" sitting underneath that someone could recover.</li>
+        <li>The text is not retrievable from the file in any way, copy, paste, search, OCR, or reading the PDF's underlying object structure.</li>
+        <li>The redacted zone is a permanent, flat marking; there's no "original" sitting underneath that someone could recover.</li>
       </ol>
       <p>If any of those is false, the redaction didn't happen. You just dressed the text in black.</p>
 
-      <h2>The three common approaches — and why two of them fail</h2>
+      <h2>The three common approaches, and why two of them fail</h2>
       <h3>Highlighter or marker tool</h3>
       <p>The colour changes, but the underlying text is untouched and still copy-pasteable. Open the file in any text-aware viewer, drag across the highlight, copy. Or OCR the rendered page and the "hidden" text comes straight back.</p>
       <h3>A "draw a black rectangle" shape</h3>
       <p>Same problem, same failure. The shape sits <em>over</em> the text; the text itself is unaffected. A surprising number of organisations have filed documents "redacted" exactly this way.</p>
       <h3>Adobe Acrobat Pro's Redact tool</h3>
-      <p>Adobe's tool does the right thing mechanically — it genuinely removes the underlying content — but its workflow has tripped up even careful users. The classic mistake: you draw the redaction boxes, then hit <strong>Save</strong> before hitting <strong>Apply Redactions</strong>. Marking a redaction and actually removing the content are two separate steps, and if you save between them, the marks are saved but the text underneath may not be. The error is silent: no warning, and the file looks finished.</p>
-      <p>Other well-documented pitfalls: converting to "image only" can re-introduce a searchable text layer depending on the tool; a single search-and-redact pattern can miss format variants (<code>(555) 555-1234</code> vs <code>555-555-1234</code>); and cloud version history can retain an unredacted draft outside the file you send. Adobe works — if you're careful, every time, and if you verify. Most people aren't doing all three on a Friday afternoon.</p>
+      <p>Adobe's tool does the right thing mechanically: it genuinely removes the underlying content, but its workflow has tripped up even careful users. The classic mistake: you draw the redaction boxes, then hit <strong>Save</strong> before hitting <strong>Apply Redactions</strong>. Marking a redaction and actually removing the content are two separate steps, and if you save between them, the marks are saved but the text underneath may not be. The error is silent: no warning, and the file looks finished.</p>
+      <p>Other well-documented pitfalls: converting to "image only" can re-introduce a searchable text layer depending on the tool; a single search-and-redact pattern can miss format variants (<code>(555) 555-1234</code> vs <code>555-555-1234</code>); and cloud version history can retain an unredacted draft outside the file you send. Adobe works, if you're careful, every time, and if you verify. Most people aren't doing all three on a Friday afternoon.</p>
 
       <h2>What safe redaction workflows have in common</h2>
       <ol>
-        <li><strong>The redaction happens on a device you control.</strong> Cloud processing means a copy of your document sits on a server you don't own — possibly logged, possibly retained.</li>
-        <li><strong>The tool removes the content, then confirms it's gone</strong> — rather than just telling you it's done.</li>
+        <li><strong>The redaction happens on a device you control.</strong> Cloud processing means a copy of your document sits on a server you don't own, possibly logged, possibly retained.</li>
+        <li><strong>The tool removes the content, then confirms it's gone</strong>, rather than just telling you it's done.</li>
         <li><strong>There's no separate "apply" step to forget.</strong> The action that marks a redaction and the action that removes the content are the same.</li>
         <li><strong>You can check the result.</strong> The output is something you, or a recipient, can inspect and confirm.</li>
       </ol>
@@ -81,19 +81,19 @@
         <li><strong>Open it in a different viewer.</strong> Preview (macOS), Edge (Windows) and Adobe don't always agree about what's been removed.</li>
         <li><strong>Compare file hashes before and after.</strong> If the hash didn't change after a "redaction," nothing was redacted.</li>
       </ul>
-      <p>Anyone publishing redacted documents at scale — legal, journalism, compliance, healthcare — should make these routine. For personal documents, the copy-paste test alone catches the vast majority of mistakes.</p>
+      <p>Anyone publishing redacted documents at scale (legal, journalism, compliance, healthcare), should make these routine. For personal documents, the copy-paste test alone catches the vast majority of mistakes.</p>
 
       <h2>When "trust us" isn't enough: private, verifiable processing</h2>
-      <p>There's one gap the checks above don't close. Finding what's sensitive in a document is the part that usually needs AI — and AI usually means sending your text to someone else's servers. That's where privacy quietly breaks, and no amount of copy-paste testing tells you whether your document was read, logged or kept along the way.</p>
-      <p>Confidential computing addresses that. The sensitive step runs inside a sealed hardware enclave — for example an <strong>AMD SEV-SNP</strong> enclave, a region of a processor whose contents are invisible to the host operating system, the cloud provider, and even the tool's operator. The hardware can produce a signed <strong>attestation</strong> proving which code ran and that it genuinely ran inside a real, sealed enclave. If that attestation verifies, the privacy of that step is a cryptographic fact, not a promise.</p>
+      <p>There's one gap the checks above don't close. Finding what's sensitive in a document is the part that usually needs AI, and AI usually means sending your text to someone else's servers. That's where privacy quietly breaks, and no amount of copy-paste testing tells you whether your document was read, logged or kept along the way.</p>
+      <p>Confidential computing addresses that. The sensitive step runs inside a sealed hardware enclave, for example an <strong>AMD SEV-SNP</strong> enclave, a region of a processor whose contents are invisible to the host operating system, the cloud provider, and even the tool's operator. The hardware can produce a signed <strong>attestation</strong> proving which code ran and that it genuinely ran inside a real, sealed enclave. If that attestation verifies, the privacy of that step is a cryptographic fact, not a promise.</p>
       <p>This is the approach <a href="https://privateredact.app">Private Redaction</a> takes, and it splits the job across two places:</p>
       <ul>
-        <li><strong>The redaction happens in your browser.</strong> Your file is opened, blacked out and rebuilt on your own device — it's never uploaded.</li>
-        <li><strong>The detection happens in a verified enclave.</strong> The only thing that leaves your browser is the extracted text, sent straight to an AMD SEV-SNP enclave — not routed through our own servers. Each run is checked against the enclave's hardware attestation and a per-response signature, and the result is shown to you before you download anything.</li>
+        <li><strong>The redaction happens in your browser.</strong> Your file is opened, blacked out and rebuilt on your own device, it's never uploaded.</li>
+        <li><strong>The detection happens in a verified enclave.</strong> The only thing that leaves your browser is the extracted text, sent straight to an AMD SEV-SNP enclave, not routed through our own servers. Each run is checked against the enclave's hardware attestation and a per-response signature, and the result is shown to you before you download anything.</li>
       </ul>
-      <p>One honest distinction: this proves your document was <em>handled privately</em> — it does not, on its own, prove the redaction caught everything. Completeness is still on you, which is exactly why the four checks above matter whatever tool you use.</p>
+      <p>One honest distinction: this proves your document was <em>handled privately</em>, it does not, on its own, prove the redaction caught everything. Completeness is still on you, which is exactly why the four checks above matter whatever tool you use.</p>
 
-      <h2>When this level of proof matters — and when it doesn't</h2>
+      <h2>When this level of proof matters, and when it doesn't</h2>
       <p>Verifiable private processing is worth it when:</p>
       <ul>
         <li>You owe a duty of confidentiality to a source, witness, patient, client or counterparty.</li>
@@ -105,7 +105,7 @@
       <h2>A practical workflow</h2>
       <ul>
         <li><strong>Personal use:</strong> any tool that genuinely removes the underlying text, applied carefully and double-checked with the copy-paste and OCR tests, is enough.</li>
-        <li><strong>Professional or regulated use:</strong> use a tool that removes the text in one step, keeps your file on your device, and lets you verify how the sensitive step was handled — then still run the checks before you send.</li>
+        <li><strong>Professional or regulated use:</strong> use a tool that removes the text in one step, keeps your file on your device, and lets you verify how the sensitive step was handled, then still run the checks before you send.</li>
       </ul>
 
       <div class="cta">
@@ -114,10 +114,10 @@
 
       <h2>Takeaways</h2>
       <ul>
-        <li>"Drew a black bar over the text" is not redaction — the text is still there.</li>
+        <li>"Drew a black bar over the text" is not redaction, the text is still there.</li>
         <li>Adobe's tool works, but its two-step workflow has tripped up careful users: apply, then verify.</li>
-        <li>Always check the output — copy-paste the redacted zones, OCR the file, compare hashes.</li>
-        <li>For sensitive work, prefer a tool that keeps your file on your device and lets you verify the processing stayed private — but remember that's a privacy guarantee, not a promise the redaction is complete.</li>
+        <li>Always check the output, copy-paste the redacted zones, OCR the file, compare hashes.</li>
+        <li>For sensitive work, prefer a tool that keeps your file on your device and lets you verify the processing stayed private, but remember that's a privacy guarantee, not a promise the redaction is complete.</li>
       </ul>
     </article>
   </main>

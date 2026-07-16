@@ -38,7 +38,7 @@
     <article class="prose">
       <p class="meta">Comparison</p>
       <h1>Private Redaction vs Adobe Acrobat Redact</h1>
-      <p class="lede">Both genuinely remove text — which already puts them ahead of highlighters and black rectangles. So this is a real comparison of two proper tools, not a takedown. Here's where each one fits.</p>
+      <p class="lede">Both genuinely remove text, which already puts them ahead of highlighters and black rectangles. So this is a real comparison of two proper tools, not a takedown. Here's where each one fits.</p>
 
       <p>Adobe Acrobat Pro's Redact tool is the industry heavyweight, and when used correctly it does the right thing: it removes the underlying content, not just covers it. Private Redaction is a free, browser-based tool built around privacy and verifiability. They're aimed at different needs. Below is an honest side-by-side, including where each one bites.</p>
 
@@ -49,30 +49,30 @@
         <tbody>
           <tr><td><strong>Cost</strong></td><td>Free</td><td>Paid (Acrobat Pro subscription; Redact isn't in free Reader)</td></tr>
           <tr><td><strong>Access</strong></td><td>In your browser, no install</td><td>Desktop app (also web/cloud)</td></tr>
-          <tr><td><strong>Where your file goes</strong></td><td>Stays on your device — never uploaded. The extracted text is sent straight to a verified enclave to find what's sensitive, and doesn't pass through our servers</td><td>Processed on your machine; some cloud features upload the file to Adobe</td></tr>
-          <tr><td><strong>Removes text (not just covers)</strong></td><td>Yes — pages are flattened, no recoverable layer</td><td>Yes — once you <em>Apply Redactions</em></td></tr>
-          <tr><td><strong>Most common mistake</strong></td><td>Automated detection can miss something — review the preview before you download</td><td>Hitting Save before "Apply Redactions" leaves the text in place, silently</td></tr>
+          <tr><td><strong>Where your file goes</strong></td><td>Stays on your device, never uploaded. The extracted text is sent straight to a verified enclave to find what's sensitive, and doesn't pass through our servers</td><td>Processed on your machine; some cloud features upload the file to Adobe</td></tr>
+          <tr><td><strong>Removes text (not just covers)</strong></td><td>Yes, pages are flattened, no recoverable layer</td><td>Yes, once you <em>Apply Redactions</em></td></tr>
+          <tr><td><strong>Most common mistake</strong></td><td>Automated detection can miss something, review the preview before you download</td><td>Hitting Save before "Apply Redactions" leaves the text in place, silently</td></tr>
           <tr><td><strong>Finding what to redact</strong></td><td>Built-in rules + private AI + your own terms</td><td>Manual selection + search-and-redact patterns</td></tr>
-          <tr><td><strong>Verifiability</strong></td><td>Downloadable hardware attestation you can check independently</td><td>None — you trust the tool</td></tr>
+          <tr><td><strong>Verifiability</strong></td><td>Downloadable hardware attestation you can check independently</td><td>None, you trust the tool</td></tr>
           <tr><td><strong>Output</strong></td><td>Redacted PDF (image-based; text isn't selectable)</td><td>Redacted PDF (non-redacted text stays selectable)</td></tr>
           <tr><td><strong>Metadata / hidden data</strong></td><td>Text is extracted fresh, so document metadata isn't carried into the output</td><td>Separate "Sanitize / Remove Hidden Information" step</td></tr>
-          <tr><td><strong>Batch &amp; pro control</strong></td><td>Single document, straightforward</td><td>Extensive — batch, precise manual control, forms, and more</td></tr>
+          <tr><td><strong>Batch &amp; pro control</strong></td><td>Single document, straightforward</td><td>Extensive: batch, precise manual control, forms, and more</td></tr>
           <tr><td><strong>Open source</strong></td><td>Yes</td><td>No</td></tr>
         </tbody>
       </table>
 
       <h2>Where Adobe is the better choice</h2>
-      <p>If you already have Acrobat Pro, need to redact at volume, want fine-grained manual control, or need the output to keep selectable, searchable text everywhere except the redactions, Adobe is the stronger tool. It's a mature professional product with a deep feature set, and for heavy PDF workflows that matters. Just respect the workflow: <strong>Apply Redactions</strong> before you save, sanitize hidden information, and verify the result — the well-documented Adobe redaction failures almost always come from skipping one of those.</p>
+      <p>If you already have Acrobat Pro, need to redact at volume, want fine-grained manual control, or need the output to keep selectable, searchable text everywhere except the redactions, Adobe is the stronger tool. It's a mature professional product with a deep feature set, and for heavy PDF workflows that matters. Just respect the workflow: <strong>Apply Redactions</strong> before you save, sanitize hidden information, and verify the result. The well-documented Adobe redaction failures almost always come from skipping one of those.</p>
 
       <h2>Where Private Redaction is the better choice</h2>
-      <p>Private Redaction wins on three things: <strong>cost</strong> (free), <strong>privacy</strong> (your file never leaves your device, and the text is sent straight to a sealed enclave the operator can't see into — not routed through our own servers), and <strong>verifiability</strong> (a downloadable attestation a third party can check against AMD — nobody else offers that). No install, nothing to configure, and no separate "apply" step to forget. It's a strong fit for a quick one-off, for anyone without an Acrobat licence, and for privacy-sensitive work where being able to <em>prove</em> the document was handled privately is worth more than raw feature count.</p>
-      <p>The honest trade-offs: the output is image-based, so its text is no longer selectable (the price of guaranteed removal), and detection is automated, so you should review the preview before relying on it — the same rule that applies to any tool.</p>
+      <p>Private Redaction wins on three things: <strong>cost</strong> (free), <strong>privacy</strong> (your file never leaves your device, and the text is sent straight to a sealed enclave the operator can't see into, not routed through our own servers), and <strong>verifiability</strong> (a downloadable attestation a third party can check against AMD, nobody else offers that). No install, nothing to configure, and no separate "apply" step to forget. It's a strong fit for a quick one-off, for anyone without an Acrobat licence, and for privacy-sensitive work where being able to <em>prove</em> the document was handled privately is worth more than raw feature count.</p>
+      <p>The honest trade-offs: the output is image-based, so its text is no longer selectable (the price of guaranteed removal), and detection is automated, so you should review the preview before relying on it. That rule applies to any tool.</p>
 
       <h2>The bottom line</h2>
-      <p>Both remove text properly, which is the bar most "redaction" fails to clear. Choose Adobe for heavy, precise, professional PDF work you're already paying for. Choose <a href="https://privateredact.app">Private Redaction</a> when you want it free, private by design, and verifiable — without installing anything. Whichever you use, run the checks afterward: copy-paste the redacted zones and confirm nothing survives.</p>
+      <p>Both remove text properly, which is the bar most "redaction" fails to clear. Choose Adobe for heavy, precise, professional PDF work you're already paying for. Choose <a href="https://privateredact.app">Private Redaction</a> when you want it free, private by design, and verifiable, without installing anything. Whichever you use, run the checks afterward: copy-paste the redacted zones and confirm nothing survives.</p>
 
       <div class="cta">
-        <p style="margin:0">Try <a href="https://privateredact.app"><strong>Private Redaction</strong></a> — free, in your browser, with a downloadable proof that the AI step stayed private. No sign-up.</p>
+        <p style="margin:0">Try <a href="https://privateredact.app"><strong>Private Redaction</strong></a>, free, in your browser, with a downloadable proof that the AI step stayed private. No sign-up.</p>
       </div>
     </article>
   </main>

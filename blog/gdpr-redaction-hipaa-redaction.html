@@ -4,14 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GDPR and HIPAA redaction: what "redacted" has to mean | Private Redaction</title>
-  <meta name="description" content="Under GDPR and HIPAA, a redaction that only covers data is still a disclosure — and a reportable breach. What proper redaction means for compliance, and how to verify it." />
+  <meta name="description" content="Under GDPR and HIPAA, a redaction that only covers data is still a disclosure, and a reportable breach. What proper redaction means for compliance, and how to verify it." />
   <link rel="canonical" href="https://privateredact.app/blog/gdpr-redaction-hipaa-redaction" />
   <meta name="theme-color" content="#080B14" />
   <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="Private Redaction" />
   <meta property="og:title" content="GDPR and HIPAA redaction: what 'redacted' has to mean" />
-  <meta property="og:description" content="Under GDPR and HIPAA, covering data is still a disclosure — and a reportable breach. What proper redaction means for compliance." />
+  <meta property="og:description" content="Under GDPR and HIPAA, covering data is still a disclosure, and a reportable breach. What proper redaction means for compliance." />
   <meta property="og:url" content="https://privateredact.app/blog/gdpr-redaction-hipaa-redaction" />
   <meta property="og:image" content="https://privateredact.app/og-image.png" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -19,7 +19,7 @@
   <meta name="twitter:description" content="Covering data is still a disclosure. What proper redaction means for GDPR and HIPAA." />
   <meta name="twitter:image" content="https://privateredact.app/og-image.png" />
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"BlogPosting","headline":"GDPR and HIPAA redaction: what 'redacted' has to mean for compliance","description":"Under GDPR and HIPAA, a redaction that only covers data is still a disclosure — and a reportable breach.","image":"https://privateredact.app/og-image.png","mainEntityOfPage":"https://privateredact.app/blog/gdpr-redaction-hipaa-redaction","publisher":{"@type":"Organization","name":"Private Redaction"}}
+  {"@context":"https://schema.org","@type":"BlogPosting","headline":"GDPR and HIPAA redaction: what 'redacted' has to mean for compliance","description":"Under GDPR and HIPAA, a redaction that only covers data is still a disclosure, and a reportable breach.","image":"https://privateredact.app/og-image.png","mainEntityOfPage":"https://privateredact.app/blog/gdpr-redaction-hipaa-redaction","publisher":{"@type":"Organization","name":"Private Redaction"}}
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,51 +38,51 @@
     <article class="prose">
       <p class="meta">Guide · 7 min read</p>
       <h1>GDPR and HIPAA redaction: what "redacted" has to mean for compliance</h1>
-      <p class="lede">Under GDPR and HIPAA, a redaction that merely covers the data is still a disclosure — and, if it's found, a reportable breach. Here's what proper redaction actually requires, and how to check it held.</p>
+      <p class="lede">Under GDPR and HIPAA, a redaction that merely covers the data is still a disclosure, and, if it's found, a reportable breach. Here's what proper redaction actually requires, and how to check it held.</p>
 
       <p class="meta" style="color:var(--fog); font-family:var(--body); text-transform:none; letter-spacing:0; font-size:12.5px; margin:0 0 20px">This is general information, not legal advice. Requirements depend on your jurisdiction, role and data. Consult your DPO, privacy officer or counsel for your situation.</p>
 
-      <p>In a compliance context, redaction isn't a formatting choice — it's the line between a lawful disclosure and a breach. And the failure mode is exactly the same one that trips everyone else up: covering data instead of removing it. If the personal data or health information is still present in the file, it hasn't been redacted. It's been disclosed with a black rectangle on top.</p>
+      <p>In a compliance context, redaction isn't a formatting choice, it's the line between a lawful disclosure and a breach. And the failure mode is exactly the same one that trips everyone else up: covering data instead of removing it. If the personal data or health information is still present in the file, it hasn't been redacted. It's been disclosed with a black rectangle on top.</p>
 
       <h2>GDPR: covered data is still personal data</h2>
-      <p>Under the GDPR, information only leaves scope when it is genuinely anonymised — when the individual can no longer be identified from it. Black bars over live text don't anonymise anything; the data is still there and still recoverable, so it's still personal data and still your responsibility.</p>
+      <p>Under the GDPR, information only leaves scope when it is genuinely anonymised, when the individual can no longer be identified from it. Black bars over live text don't anonymise anything; the data is still there and still recoverable, so it's still personal data and still your responsibility.</p>
       <p>This bites most often in two places:</p>
       <ul>
         <li><strong>Subject access requests (DSARs).</strong> You frequently have to disclose a record while redacting the personal data of <em>third parties</em> in it. If those redactions can be lifted, you've disclosed someone else's personal data.</li>
-        <li><strong>Breach notification.</strong> A failed redaction that exposes personal data is a personal data breach — which can carry a notification obligation (in many cases within 72 hours) and regulatory consequences.</li>
+        <li><strong>Breach notification.</strong> A failed redaction that exposes personal data is a personal data breach, which can carry a notification obligation (in many cases within 72 hours) and regulatory consequences.</li>
       </ul>
 
       <h2>HIPAA: PHI has to actually be gone</h2>
-      <p>For protected health information, HIPAA's de-identification standard recognises two routes: <strong>Safe Harbor</strong> (removing the 18 specified identifiers — names, dates, contact details, record numbers, and so on) or <strong>Expert Determination</strong>. Either way, the identifiers have to be <em>removed</em>. A redaction that leaves the underlying text recoverable hasn't removed anything, so the PHI is still disclosed — an impermissible disclosure that can trigger breach notification.</p>
+      <p>For protected health information, HIPAA's de-identification standard recognises two routes: <strong>Safe Harbor</strong> (removing the 18 specified identifiers, names, dates, contact details, record numbers, and so on) or <strong>Expert Determination</strong>. Either way, the identifiers have to be <em>removed</em>. A redaction that leaves the underlying text recoverable hasn't removed anything, so the PHI is still disclosed, an impermissible disclosure that can trigger breach notification.</p>
 
       <h2>What compliant redaction requires</h2>
       <ol>
-        <li><strong>Remove, don't cover.</strong> The content must be gone from the file — not selectable, searchable, or retrievable by OCR or inspecting the file's structure.</li>
+        <li><strong>Remove, don't cover.</strong> The content must be gone from the file, not selectable, searchable, or retrievable by OCR or inspecting the file's structure.</li>
         <li><strong>Deal with the hidden layers.</strong> Metadata, tracked changes, comments and hidden text carry identifiers too. Strip them.</li>
         <li><strong>Verify every output.</strong> Copy-paste the redacted zones, OCR the file, and confirm nothing survives. Make it a routine step, not a spot check.</li>
-        <li><strong>Control who processes the data.</strong> If you send documents to a third-party service to redact them, you've shared personal data or PHI with a processor — which generally needs the right contractual footing (a GDPR processor agreement, or a HIPAA Business Associate Agreement) and adds a place the data can be exposed.</li>
+        <li><strong>Control who processes the data.</strong> If you send documents to a third-party service to redact them, you've shared personal data or PHI with a processor, which generally needs the right contractual footing (a GDPR processor agreement, or a HIPAA Business Associate Agreement) and adds a place the data can be exposed.</li>
         <li><strong>Keep it demonstrable.</strong> Being able to show <em>how</em> a document was handled matters as much as the redaction itself.</li>
       </ol>
 
       <h2>The processing question people miss</h2>
-      <p>Redaction increasingly involves AI to find the identifiers — and that usually means sending the text to someone else's servers, which is precisely the kind of third-party exposure the rules care about. Two design choices reduce that exposure:</p>
+      <p>Redaction increasingly involves AI to find the identifiers, and that usually means sending the text to someone else's servers, which is precisely the kind of third-party exposure the rules care about. Two design choices reduce that exposure:</p>
       <ul>
         <li><strong>Process on the user's device.</strong> If the file is redacted locally, no copy sits on an external server to be logged or retained.</li>
-        <li><strong>Run the sensitive step in a verified enclave.</strong> When text does need to be analysed by AI, running it inside confidential-computing hardware (an AMD SEV-SNP enclave) means the operator and cloud host can't see it — and the enclave's attestation can be checked, so "it stayed private" is verifiable rather than assumed.</li>
+        <li><strong>Run the sensitive step in a verified enclave.</strong> When text does need to be analysed by AI, running it inside confidential-computing hardware (an AMD SEV-SNP enclave) means the operator and cloud host can't see it, and the enclave's attestation can be checked, so "it stayed private" is verifiable rather than assumed.</li>
       </ul>
-      <p><a href="https://privateredact.app">Private Redaction</a> is built this way: the file is redacted in your browser and never uploaded, and the extracted text is sent straight from your browser to a verified private enclave — it doesn't pass through our own servers — with a downloadable attestation you can check independently. That reduces the third-party-exposure surface compared with a tool that ships your document to a server, or one that relays your text through its own backend.</p>
+      <p><a href="https://privateredact.app">Private Redaction</a> is built this way: the file is redacted in your browser and never uploaded, and the extracted text is sent straight from your browser to a verified private enclave (it doesn't pass through our own servers), with a downloadable attestation you can check independently. That reduces the third-party-exposure surface compared with a tool that ships your document to a server, or one that relays your text through its own backend.</p>
       <p><strong>Be clear about what that does and doesn't do.</strong> Reducing exposure is not the same as making you compliant. Automated detection can miss an identifier, so you must review the output. Using the tool is not a substitute for your own compliance programme, and it does not by itself provide a Business Associate Agreement or a processor contract. For anything regulated, treat it as one control among several, and get advice specific to your obligations.</p>
 
       <h2>Takeaways</h2>
       <ul>
-        <li>Covered data is still disclosed data — and under GDPR/HIPAA a failed redaction can be a reportable breach.</li>
+        <li>Covered data is still disclosed data, and under GDPR/HIPAA a failed redaction can be a reportable breach.</li>
         <li>Compliant redaction means the content is removed and unrecoverable, including metadata and hidden layers.</li>
         <li>Where the data is processed matters: local + verifiable-private processing reduces third-party exposure.</li>
-        <li>Always verify the output, keep records, and get advice for your specific obligations — no tool makes you compliant on its own.</li>
+        <li>Always verify the output, keep records, and get advice for your specific obligations, no tool makes you compliant on its own.</li>
       </ul>
 
       <div class="cta">
-        <p style="margin:0"><a href="https://privateredact.app"><strong>Private Redaction</strong></a> keeps your file on your device and runs the AI step in a verified private enclave, with a downloadable attestation receipt. Free, in your browser. Review the output before relying on it — it's a tool, not legal advice.</p>
+        <p style="margin:0"><a href="https://privateredact.app"><strong>Private Redaction</strong></a> keeps your file on your device and runs the AI step in a verified private enclave, with a downloadable attestation receipt. Free, in your browser. Review the output before relying on it, it's a tool, not legal advice.</p>
       </div>
     </article>
   </main>
