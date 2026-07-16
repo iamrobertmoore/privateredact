@@ -6,7 +6,7 @@ Private Redaction blacks out sensitive details (names, emails, phone numbers, ad
 
 ## Key facts
 - Free, no sign-up, runs client-side in the browser.
-- Input: PDF, DOCX, TXT, MD. Output: a redacted PDF with the sensitive content truly removed, not just visually covered.
+- Input: PDF, DOCX, TXT, MD, and images (PNG, JPG, etc.). Images and scanned/image-only PDFs are read with in-browser OCR (tesseract.js), so the image never leaves the device. Output: a redacted PDF with the sensitive content truly removed, not just visually covered.
 - Privacy: the file stays on the device; the extracted text is sent straight from the browser to the Nillion TEE using a short-lived delegation token, so it does not pass through the app's own server. (If the direct path is unavailable it falls back to a stateless relay; the UI shows which path each run used.)
 - Verifiable: displays an AMD SEV-SNP attestation result and a per-response signature check.
 - Built on Nillion nilAI (private LLM inference in a TEE).

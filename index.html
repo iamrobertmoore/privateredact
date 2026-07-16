@@ -21,7 +21,7 @@
   <meta name="twitter:description" content="Black out sensitive details in your documents, in your browser. AI detection runs in a sealed, hardware-verified enclave." />
   <meta name="twitter:image" content="https://privateredact.app/og-image.png" />
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebApplication","name":"Private Redaction","url":"https://privateredact.app/","applicationCategory":"SecurityApplication","operatingSystem":"Any (web browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true,"description":"Redact sensitive details from PDF and documents in your browser. The file never leaves your device; AI detection runs in a verified private enclave (TEE).","featureList":["In-browser redaction","Verifiable private AI via TEE attestation","PDF, DOCX and TXT support","Custom redaction terms"]}
+  {"@context":"https://schema.org","@type":"WebApplication","name":"Private Redaction","url":"https://privateredact.app/","applicationCategory":"SecurityApplication","operatingSystem":"Any (web browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true,"description":"Redact sensitive details from PDF and documents in your browser. The file never leaves your device; AI detection runs in a verified private enclave (TEE).","featureList":["In-browser redaction","Verifiable private AI via TEE attestation","PDF, DOCX, TXT and image (OCR) support","OCR for images and scanned PDFs","Custom redaction terms"]}
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,7 +38,7 @@
         <span class="dot" aria-hidden="true"></span>
         <h1 class="wordmark">Private Redaction</h1>
       </div>
-      <nav class="topnav"><a href="/blog/">Blog</a></nav>
+      <nav class="topnav"><a href="/blog/">Blog</a> <a href="https://github.com/iamrobertmoore/privateredact" target="_blank" rel="noopener">GitHub</a></nav>
     </div>
   </header>
 
@@ -70,7 +70,7 @@
     <section class="card">
       <div class="step-head"><span class="num">1</span><h2>Upload a document</h2></div>
       <div id="drop" class="drop">
-        <input id="file" type="file" accept=".pdf,.docx,.txt,.md" hidden />
+        <input id="file" type="file" accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,.webp,.gif,.bmp" hidden />
         <div class="up-ic" aria-hidden="true">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
             <path d="M12 15.5V4.5M12 4.5L8 8.5M12 4.5l4 4" stroke="#6E97FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -78,7 +78,7 @@
           </svg>
         </div>
         <p class="big"><strong>Drop a file here</strong> or <button id="pick" class="link">browse</button></p>
-        <p class="muted small">PDF, DOCX, TXT or MD · stays on your device</p>
+        <p class="muted small">PDF, Word, text or an image (PNG, JPG…) · stays on your device</p>
       </div>
       <div id="fileInfo" class="file-info hidden"></div>
     </section>

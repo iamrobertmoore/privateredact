@@ -46,6 +46,8 @@ const state = {
   isPdf: false,
   pdf: null,            // pdf.js document (kept for rendering)
   pageItems: [],        // per page: [{str,start,end,transform,width,height}]
+  isImage: false,       // input is an image / scanned PDF (OCR path)
+  imagePages: null,     // per page: {canvas, words:[{text,start,end,bbox}], width, height}
   detections: [],
   disabled: new Set(),
   customTerms: [],
@@ -164,6 +166,112 @@ async function extractText(file) {
   }
 
   return await file.text();
+}
+
+/* ------------------------------------------------------------------- OCR
+ * Images and scanned (image-only) PDFs have no text layer. We OCR them fully in
+ * the browser with tesseract.js (WASM) — the image never leaves the device — and
+ * build a page-image model with per-word bounding boxes, so detected sensitive
+ * text can be blacked out at its real pixel position and the page flattened.
+ */
+const TESS = {
+  main: '/lib/tesseract/tesseract.min.js',
+  worker: '/lib/tesseract/worker.min.js',
+  core: '/lib/tesseract/tesseract-core-simd-lstm.wasm.js',
+  lang: '/lib/tesseract/',
+};
+let _tessPromise = null;
+function loadTesseract() {
+  if (typeof window !== 'undefined' && window.Tesseract) return Promise.resolve(window.Tesseract);
+  if (_tessPromise) return _tessPromise;
+  _tessPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = TESS.main; s.async = true;
+    s.onload = () => (window.Tesseract ? resolve(window.Tesseract) : reject(new Error('OCR engine loaded but did not initialise')));
+    s.onerror = () => reject(new Error('failed to load the OCR engine'));
+    document.head.appendChild(s);
+  });
+  return _tessPromise;
+}
+
+async function withOcrWorker(fn) {
+  const Tesseract = await loadTesseract();
+  const worker = await Tesseract.createWorker('eng', 1, {
+    workerPath: TESS.worker,
+    corePath: TESS.core,
+    langPath: TESS.lang,
+    gzip: false,           // we vendor the uncompressed model to avoid content-encoding issues
+    workerBlobURL: false,  // load the worker directly so relative core/lang paths resolve
+  });
+  try { return await fn(worker); } finally { try { await worker.terminate(); } catch (e) {} }
+}
+
+// Recognise a canvas and return words [{text, bbox:{x0,y0,x1,y1}}] in canvas pixels.
+async function recognizeWords(worker, canvas) {
+  const { data } = await worker.recognize(canvas, {}, { blocks: true });
+  const words = [];
+  const push = (w) => { if (w && typeof w.text === 'string' && w.text.trim() && w.bbox) words.push({ text: w.text, bbox: w.bbox }); };
+  if (Array.isArray(data.blocks)) {
+    for (const b of data.blocks) for (const p of (b.paragraphs || [])) for (const l of (p.lines || [])) for (const w of (l.words || [])) push(w);
+  }
+  if (!words.length && Array.isArray(data.words)) data.words.forEach(push);
+  return words;
+}
+
+function fileToImageCanvas(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+      canvas.getContext('2d').drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      resolve(canvas);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('could not decode that image')); };
+    img.src = url;
+  });
+}
+
+// Page-image model: [{canvas, words, width, height}] with word bboxes in canvas px.
+async function ocrImageFile(file) {
+  const canvas = await fileToImageCanvas(file);
+  const words = await withOcrWorker((w) => recognizeWords(w, canvas));
+  return [{ canvas, words, width: canvas.width, height: canvas.height }];
+}
+
+async function ocrPdfPages(pdf, onPage) {
+  return withOcrWorker(async (worker) => {
+    const pages = [];
+    for (let p = 1; p <= pdf.numPages; p++) {
+      if (onPage) onPage(p, pdf.numPages);
+      const page = await pdf.getPage(p);
+      const viewport = page.getViewport({ scale: RENDER_SCALE });
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.ceil(viewport.width); canvas.height = Math.ceil(viewport.height);
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+      const words = await recognizeWords(worker, canvas);
+      pages.push({ canvas, words, width: canvas.width, height: canvas.height });
+    }
+    return pages;
+  });
+}
+
+// Flatten page words into one string, recording each word's [start,end] offset.
+function pagesToText(pages) {
+  let text = '';
+  pages.forEach((pg, pi) => {
+    let pageStr = '';
+    pg.words.forEach((w, k) => {
+      const start = text.length + pageStr.length;
+      w.start = start; w.end = start + w.text.length;
+      pageStr += w.text + (k < pg.words.length - 1 ? ' ' : '');
+    });
+    text += pageStr;
+    if (pi < pages.length - 1) text += '\n\n';
+  });
+  return text;
 }
 
 /* ------------------------------------------------------------ AI detection */
@@ -663,6 +771,35 @@ async function buildRedactedPdfFromImages(spans) {
   return await outDoc.save();
 }
 
+/* --------------------------------- image / scanned PDF: pixel redaction */
+// Paint solid black over the bounding box of every OCR word that overlaps an
+// active detection, then flatten each page image into the output PDF. Word-level
+// granularity (cover the whole word) — safe, since OCR char boxes aren't reliable.
+async function buildRedactedPdfFromPageImages(spans) {
+  const { PDFDocument } = window.PDFLib;
+  const outDoc = await PDFDocument.create();
+  for (const pg of state.imagePages) {
+    const canvas = document.createElement('canvas');
+    canvas.width = pg.width; canvas.height = pg.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(pg.canvas, 0, 0);
+    ctx.fillStyle = '#000';
+    for (const w of pg.words) {
+      let hit = false;
+      for (const s of spans) { if (Math.max(s.start, w.start) < Math.min(s.end, w.end)) { hit = true; break; } }
+      if (!hit) continue;
+      const { x0, y0, x1, y1 } = w.bbox;
+      const padY = Math.max(2, (y1 - y0) * 0.18), padX = Math.max(2, (y1 - y0) * 0.12);
+      ctx.fillRect(x0 - padX, y0 - padY, (x1 - x0) + 2 * padX, (y1 - y0) + 2 * padY);
+    }
+    const pngBytes = dataURLtoBytes(canvas.toDataURL('image/png'));
+    const img = await outDoc.embedPng(pngBytes);
+    const outPage = outDoc.addPage([pg.width, pg.height]);
+    outPage.drawImage(img, { x: 0, y: 0, width: pg.width, height: pg.height });
+  }
+  return await outDoc.save();
+}
+
 /* --------------------------------------------- DOCX/TXT: reflow redaction */
 function sanitize(t) {
   const a = t.split('');
@@ -736,9 +873,11 @@ async function refreshPreview() {
   const spans = activeSpans();
   status('Rendering redacted preview…', 'busy');
   try {
-    const bytes = (state.isPdf && state.pageItems.length)
-      ? await buildRedactedPdfFromImages(spans)
-      : await buildReflowedPdf(state.text, spans);
+    const bytes = state.isImage
+      ? await buildRedactedPdfFromPageImages(spans)
+      : (state.isPdf && state.pageItems.length)
+        ? await buildRedactedPdfFromImages(spans)
+        : await buildReflowedPdf(state.text, spans);
     if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
     state.currentBytes = bytes;
     state.previewUrl = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
@@ -768,17 +907,42 @@ function initChecklist() {
 
 async function onFile(file) {
   if (!file) return;
-  status('Reading file…', 'busy');
-  try { state.text = await extractText(file); }
-  catch (e) { status('Could not read that file: ' + e.message, 'err'); return; }
-  if (!state.text.trim()) { status('No extractable text found in that file.', 'err'); return; }
+  const name = (file.name || '').toLowerCase();
+  const isImg = /\.(png|jpe?g|webp|gif|bmp)$/.test(name) || (file.type || '').startsWith('image/');
+  state.isImage = false; state.imagePages = null; state.isPdf = false; state.pdf = null; state.pageItems = [];
+
+  try {
+    if (isImg) {
+      status('Reading text from the image with on-device OCR (the first run loads the model)…', 'busy');
+      state.imagePages = await ocrImageFile(file);
+      state.isImage = true;
+      state.text = pagesToText(state.imagePages);
+    } else {
+      status('Reading file…', 'busy');
+      state.text = await extractText(file);
+      // Scanned / image-only PDF: no real text layer -> OCR the rendered pages.
+      if (state.isPdf && state.text.replace(/\s/g, '').length < 12) {
+        status('No text layer found, running on-device OCR on the scanned pages…', 'busy');
+        state.imagePages = await ocrPdfPages(state.pdf, (p, n) => status('OCR: reading scanned page ' + p + ' of ' + n + '…', 'busy'));
+        state.isImage = true;
+        state.text = pagesToText(state.imagePages);
+      }
+    }
+  } catch (e) {
+    status('Could not read that file: ' + (e && e.message ? e.message : e), 'err');
+    return;
+  }
+  if (!state.text.trim()) { status('No readable text found in that file.', 'err'); return; }
 
   state.fileName = file.name;
   state.detections = []; state.disabled = new Set(); state.customTerms = []; state.aiItems = null;
 
   const info = document.getElementById('fileInfo');
   info.classList.remove('hidden');
-  info.textContent = state.fileName + ' · ' + state.text.length.toLocaleString() + ' characters extracted';
+  const wordCount = state.imagePages ? state.imagePages.reduce((a, p) => a + p.words.length, 0) : null;
+  info.textContent = state.fileName + ' · ' + (wordCount != null
+    ? wordCount.toLocaleString() + ' words read via OCR'
+    : state.text.length.toLocaleString() + ' characters extracted');
 
   document.getElementById('optionsCard').classList.remove('disabled');
   document.getElementById('detect').disabled = false;

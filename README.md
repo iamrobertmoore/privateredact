@@ -14,7 +14,7 @@
 
 ---
 
-Private Redaction blacks out names, emails, phone numbers, addresses, IDs, card numbers and any custom terms in PDF, DOCX and TXT files. Your document is opened and redacted **entirely on your own device**. The file is never uploaded. To find what's sensitive, the extracted text is sent **straight from your browser to a private AI running inside a hardware-sealed enclave**, it doesn't pass through this app's own server, and every run is verified against that enclave's attestation. So instead of trusting a promise that your document stayed private, you get to check it.
+Private Redaction blacks out names, emails, phone numbers, addresses, IDs, card numbers and any custom terms in PDF, DOCX, TXT and image files (PNG, JPG, and scanned PDFs are read with in-browser OCR). Your document is opened and redacted **entirely on your own device**. The file is never uploaded. To find what's sensitive, the extracted text is sent **straight from your browser to a private AI running inside a hardware-sealed enclave**, it doesn't pass through this app's own server, and every run is verified against that enclave's attestation. So instead of trusting a promise that your document stayed private, you get to check it.
 
 Free, no sign-up, runs in the browser.
 
