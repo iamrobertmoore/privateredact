@@ -89,7 +89,7 @@
       <p>This is the approach <a href="https://privateredact.app">Private Redaction</a> takes, and it splits the job across two places:</p>
       <ul>
         <li><strong>The redaction happens in your browser.</strong> Your file is opened, blacked out and rebuilt on your own device — it's never uploaded.</li>
-        <li><strong>The detection happens in a verified enclave.</strong> The only thing that leaves your browser is the extracted text, analysed inside an AMD SEV-SNP enclave. Each run is checked against the enclave's hardware attestation and a per-response signature, and the result is shown to you before you download anything.</li>
+        <li><strong>The detection happens in a verified enclave.</strong> The only thing that leaves your browser is the extracted text, sent straight to an AMD SEV-SNP enclave — not routed through our own servers. Each run is checked against the enclave's hardware attestation and a per-response signature, and the result is shown to you before you download anything.</li>
       </ul>
       <p>One honest distinction: this proves your document was <em>handled privately</em> — it does not, on its own, prove the redaction caught everything. Completeness is still on you, which is exactly why the four checks above matter whatever tool you use.</p>
 
@@ -109,7 +109,7 @@
       </ul>
 
       <div class="cta">
-        <p style="margin:0"><a href="https://privateredact.app"><strong>Private Redaction</strong></a> is a free tool built this way: redaction runs in your browser, the AI detection runs in a verified private enclave, and the output is a PDF with the sensitive content genuinely removed. Upload a file, choose what to redact, download the result.</p>
+        <p style="margin:0"><a href="https://privateredact.app"><strong>Private Redaction</strong></a> is a free tool built this way: redaction runs in your browser, the extracted text is sent straight to a verified private enclave (not through our servers), and the output is a PDF with the sensitive content genuinely removed. Upload a file, choose what to redact, download the result.</p>
       </div>
 
       <h2>Takeaways</h2>

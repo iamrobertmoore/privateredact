@@ -3,6 +3,7 @@ package-lock.json
 server/verify-config.js
 .env
 .netlify/
+deno.lock
 *.log
 .DS_Store
 
@@ -11,4 +12,5 @@ DESIGN_BRIEF.md
 ADVERSARIAL_REVIEW.md
 ADVERSARIAL_REVIEW_FINDINGS.md
 POLSIA_BRIEF.md
+DEPLOY_DIRECT_PATH.md
 design/

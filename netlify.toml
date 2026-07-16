@@ -12,10 +12,32 @@
 [functions]
   node_bundler = "esbuild"
 
+# The token function's real logic is a pre-built, self-contained ESM bundle
+# (token/impl.mjs) — the nilAI SDK's deps use top-level await + an ESM-only chain
+# that Netlify's esbuild can't re-bundle to CJS. token/token.js is a thin CJS entry
+# (Netlify wraps entries as CJS) that dynamic-imports impl.mjs via Node's own loader.
+# Use the file tracer (nft) so neither file is re-bundled, and ship impl.mjs.
+# Rebuild impl.mjs with scripts/nilai-client-build/build-token-fn.mjs.
+[functions."token"]
+  node_bundler = "nft"
+  included_files = ["netlify/functions/token/impl.mjs"]
+
 # The browser calls /api/verify (same origin); Netlify routes it to the function.
 [[redirects]]
   from = "/api/verify"
   to = "/.netlify/functions/verify"
+  status = 200
+
+# Direct path: mint a short-lived delegation token (never sees document text).
+[[redirects]]
+  from = "/api/token"
+  to = "/.netlify/functions/token"
+  status = 200
+
+# Direct path: enclave attestation only (no document text, no AI call).
+[[redirects]]
+  from = "/api/attest"
+  to = "/.netlify/functions/attest"
   status = 200
 
 # Don't serve source, tests, design mockups or internal docs from the deploy.
@@ -61,6 +83,26 @@
   force = true
 [[redirects]]
   from = "/config.example.js"
+  to = "/404.html"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/scripts/*"
+  to = "/404.html"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/package.json"
+  to = "/404.html"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/DEPLOY_DIRECT_PATH.md"
+  to = "/404.html"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/package-lock.json"
   to = "/404.html"
   status = 404
   force = true

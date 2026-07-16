@@ -1,0 +1,7 @@
+{
+  "name": "private-redaction",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Private Redaction — static frontend plus Netlify functions (pre-built delegation-token minter + enclave attestation verifier). No runtime npm dependencies: the browser client and the token function are pre-built, vendored bundles (see scripts/nilai-client-build/README.md to regenerate them).",
+  "license": "MIT"
+}

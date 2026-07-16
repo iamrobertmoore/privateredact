@@ -50,11 +50,14 @@
 
       <h2>5. Privacy</h2>
       <p>The Tool is designed so that your document file stays on your device and only its extracted text is analysed within
-      secured, hardware-isolated infrastructure operated via Nillion. To reach that infrastructure, the extracted text is
-      relayed through our own service, which handles it in transit to forward it and to verify the result; the sealed-enclave
-      guarantee applies to the Nillion infrastructure, not to that relay. This description reflects how the Tool is intended to
-      operate and may change as the service evolves. It is not a guarantee against every possible risk. Any separate privacy
-      notice we publish also applies.</p>
+      secured, hardware-isolated infrastructure operated via Nillion. The Tool is designed to send that extracted text from
+      your browser directly to the Nillion sealed enclave: our own service issues only a short-lived access token (derived
+      from a public key) and does not receive the extracted text in that path. If that direct path is unavailable, the Tool
+      may fall back to relaying the extracted text through our own stateless service, which handles it only in transit to
+      forward it and verify the result; the interface indicates which path was used for a given run. The sealed-enclave
+      guarantee applies to the Nillion infrastructure. This description reflects how the Tool is intended to operate and may
+      change as the service evolves. It is not a guarantee against every possible risk. Any separate privacy notice we publish
+      also applies.</p>
 
       <h2>6. Limitation of liability</h2>
       <p>To the maximum extent permitted by applicable law, we shall not be liable for any indirect, incidental, special,

@@ -10,7 +10,18 @@
  * `proxyUrl` to its absolute HTTPS URL instead.
  */
 window.NILAI = {
+  // Direct (private) path — the browser mints a delegation token via tokenUrl,
+  // then calls the enclave directly at nucBaseUrl, so document text never touches
+  // our server. attestUrl supplies the (text-free) enclave attestation proof.
+  tokenUrl: '/api/token',
+  attestUrl: '/api/attest',
+  nucBaseUrl: 'https://api.nilai.nillion.network/nuc/v1/',
+  clientBundle: 'lib/nilai-client.min.js',
+
+  // Fallback path — if the direct path is unavailable, relay through the verifier
+  // (server sees the text for that request only, but the enclave is still verified).
   proxyUrl: '/api/verify',
+
   baseUrl: 'https://api.nilai.nillion.network',
   model: 'google/gemma-4-26B-A4B-it'
 };

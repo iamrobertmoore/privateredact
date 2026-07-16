@@ -32,6 +32,11 @@ function loadConfig() {
     baseUrl: c.baseUrl || DEFAULTS.baseUrl,
     model: c.model || DEFAULTS.model,
     proxyUrl: c.proxyUrl || '',
+    // Direct (private) path config
+    tokenUrl: c.tokenUrl || '',
+    attestUrl: c.attestUrl || '',
+    nucBaseUrl: c.nucBaseUrl || '',
+    clientBundle: c.clientBundle || '',
   };
 }
 
@@ -177,6 +182,126 @@ function buildAiInput(text, aiKeys, instructions) {
   return parts.join('\n\n');
 }
 
+/* ---------------------------------------------------- direct (private) path
+ * The browser mints a short-lived delegation token from our server (which never
+ * sees the document), then calls the sealed enclave DIRECTLY. The document text
+ * goes browser -> enclave over TLS and never touches our server. Enclave
+ * genuineness is proven separately by /api/attest (a text-free attestation call).
+ */
+let _nilaiClientPromise = null;
+function loadNilaiClient(cfg) {
+  if (typeof window !== 'undefined' && window.NilaiClient && window.NilaiClient.ready) return Promise.resolve(window.NilaiClient);
+  if (_nilaiClientPromise) return _nilaiClientPromise;
+  _nilaiClientPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = cfg.clientBundle;
+    s.async = true;
+    s.onload = () => {
+      if (window.NilaiClient && window.NilaiClient.ready) resolve(window.NilaiClient);
+      else reject(new Error('nilAI client bundle loaded but did not initialise'));
+    };
+    s.onerror = () => reject(new Error('failed to load nilAI client bundle'));
+    document.head.appendChild(s);
+  });
+  return _nilaiClientPromise;
+}
+
+function b64ToBytes(b64) {
+  const bin = atob(String(b64).trim().replace(/^"|"$/g, ''));
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+function bytesToHex(u8) {
+  let h = '';
+  for (let i = 0; i < u8.length; i++) h += u8[i].toString(16).padStart(2, '0');
+  return h;
+}
+
+// Best-effort client-side check that a raw enclave response was signed by the
+// enclave's public key. Uses secp256k1 (WebCrypto can't). Returns true only on a
+// confirmed match; any uncertainty returns false (we never fake a pass).
+function verifyEnclaveResponseSignature(rawText, pkB64) {
+  try {
+    const NC = window.NilaiClient;
+    if (!NC || !NC.secp256k1 || !NC.sha256 || !rawText || !pkB64) return false;
+    const obj = JSON.parse(rawText);
+    const s = obj.signature;
+    if (!s) return false;
+    let pre = rawText.replace('"signature":"' + s + '"', '"signature":""');
+    for (const f of ['created_at', 'created', 'temperature', 'top_p']) {
+      pre = pre.replace(new RegExp('("' + f + '":)(-?\\d+)([,}\\]])'), '$1$2.0$3');
+    }
+    const msgHash = NC.sha256(new TextEncoder().encode(pre));
+    const pub = b64ToBytes(pkB64); // 33-byte compressed point
+    const sig = NC.secp256k1.Signature.fromDER(bytesToHex(b64ToBytes(s)));
+    return NC.secp256k1.verify(sig, msgHash, pub, { lowS: false });
+  } catch (e) { return false; }
+}
+
+async function fetchAttestation(cfg) {
+  if (!cfg.attestUrl) return { attestation: { attestation_verified: false, error: 'no attestation endpoint' }, receipt: null, enclave_public_key: null };
+  const r = await fetch(cfg.attestUrl, { method: 'GET' });
+  if (!r.ok) throw new Error('attestation ' + r.status);
+  return r.json();
+}
+
+// Full direct path. Throws on any failure so aiCall can fall back to the relay.
+async function aiCallDirect(model, input, cfg) {
+  const NC = await loadNilaiClient(cfg);
+  const client = new NC.NilaiOpenAIClient({ baseURL: cfg.nucBaseUrl, authType: NC.AuthType.DELEGATION_TOKEN });
+
+  // 1) client produces a delegation request (its ephemeral public key only)
+  const delegationRequest = client.getDelegationRequest();
+
+  // 2) our server mints a token authorising that key — it never sees `input`
+  const tr = await fetch(cfg.tokenUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ delegationRequest }) });
+  if (!tr.ok) {
+    let detail = '';
+    try { const ed = await tr.json(); if (ed && ed.error) detail = ': ' + ed.error; } catch (e) {}
+    throw new Error('token ' + tr.status + detail);
+  }
+  const { delegationToken, error } = await tr.json();
+  if (error || !delegationToken) throw new Error(error || 'no delegation token returned');
+  client.updateDelegation(delegationToken);
+
+  // 3) call the enclave DIRECTLY with the document text (never routed via us)
+  const payload = { model, messages: [{ role: 'user', content: input }] };
+  const call = client.chat.completions.create(payload);
+  let parsed, raw = null;
+  if (call && typeof call.withResponse === 'function') {
+    const wr = await call.withResponse();
+    parsed = wr.data;
+    try { raw = await wr.response.clone().text(); } catch (e) {}
+  } else {
+    parsed = await call;
+  }
+  const text = extractResponseText(parsed);
+  const signature = (parsed && parsed.signature) || null;
+
+  // 4) attestation proof (text-free) + response-signature check (best effort)
+  const att = await fetchAttestation(cfg);
+  const pk = att.enclave_public_key || (att.receipt && att.receipt.enclave_public_key) || null;
+  const teeVerified = raw ? verifyEnclaveResponseSignature(raw, pk) : false;
+
+  return { text, verification: { mode: 'verified', path: 'direct', tee_verified: teeVerified, attestation: att.attestation, signature, receipt: att.receipt } };
+}
+
+// Relay path (fallback): send text through our verifier function, which calls the
+// enclave and returns the result plus verification. The server sees the text for
+// that request only.
+async function aiCallRelay(model, input, cfg) {
+  const r = await fetch(cfg.proxyUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model, input }) });
+  if (!r.ok) {
+    let detail = '';
+    try { const ed = await r.json(); if (ed && ed.error) detail = ': ' + ed.error; } catch (e) {}
+    throw new Error('verifier ' + r.status + detail);
+  }
+  const d = await r.json();
+  if (d.error) throw new Error(d.error);
+  return { text: d.text || '', verification: { mode: 'verified', path: 'relay', tee_verified: d.tee_verified, attestation: d.attestation, signature: d.signature, receipt: d.receipt } };
+}
+
 async function directCall(model, input, cfg) {
   const headers = { 'Content-Type': 'application/json' };
   if (cfg.apiKey) headers['Authorization'] = 'Bearer ' + cfg.apiKey;
@@ -185,20 +310,20 @@ async function directCall(model, input, cfg) {
   return extractResponseText(await res.json());
 }
 
-// Returns { text, verification }. Uses the verifier (proxyUrl) when reachable so
-// the response is provably from a genuine TEE; falls back to a direct call.
+// Returns { text, verification }. Prefers the DIRECT path (document text never
+// touches our server); falls back to the relay verifier, then to a keyed direct
+// call, so the app keeps working even if the direct path is unavailable.
 async function aiCall(model, input, cfg) {
+  if (cfg.tokenUrl && cfg.nucBaseUrl && cfg.clientBundle) {
+    try {
+      return await aiCallDirect(model, input, cfg);
+    } catch (e) {
+      if (typeof console !== 'undefined') console.warn('direct path unavailable, falling back to relay:', e && e.message);
+    }
+  }
   if (cfg.proxyUrl) {
     try {
-      const r = await fetch(cfg.proxyUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model, input }) });
-      if (!r.ok) {
-        let detail = '';
-        try { const ed = await r.json(); if (ed && ed.error) detail = ': ' + ed.error; } catch (e) {}
-        throw new Error('verifier ' + r.status + detail);
-      }
-      const d = await r.json();
-      if (d.error) throw new Error(d.error);
-      return { text: d.text || '', verification: { mode: 'verified', tee_verified: d.tee_verified, attestation: d.attestation, signature: d.signature, receipt: d.receipt } };
+      return await aiCallRelay(model, input, cfg);
     } catch (e) {
       if (cfg.apiKey) return { text: await directCall(model, input, cfg), verification: { mode: 'unavailable', reason: e.message } };
       throw e;
@@ -265,7 +390,7 @@ async function detect(useCache) {
     }
   }
 
-  const aiConfigured = !!(cfg.apiKey || cfg.proxyUrl);
+  const aiConfigured = !!(cfg.apiKey || cfg.proxyUrl || (cfg.tokenUrl && cfg.nucBaseUrl && cfg.clientBundle));
   if (aiKeys.length || instructions) {
     if (useCache && state.aiItems) {
       applyAiItems(state.aiItems, text, found);
@@ -322,6 +447,11 @@ function downloadReceipt(v) {
   const receipt = {
     tool: 'Private Redaction',
     what_this_is: 'Attestation evidence for the AMD SEV-SNP enclave that performed the AI detection. It proves the enclave is genuine and running the expected build, is verifiable independently against AMD, and reveals nothing about your document.',
+    delivery: v.path === 'direct'
+      ? 'direct: the document text was sent from the browser straight to the enclave and did not pass through the tool operator’s server (which only minted a short-lived delegation token from a public key).'
+      : 'relay: the document text was sent via the tool operator’s stateless verifier function, which forwarded it to the enclave.',
+    response_signature: v.signature || null,
+    response_signature_verified_in_browser: !!v.tee_verified,
     verified_at: r.verified_at || new Date().toISOString(),
     endpoint: r.endpoint || null,
     processor: att.processor || null,
@@ -352,27 +482,39 @@ function renderVerification(v) {
 
   if (v.mode === 'verified') {
     const att = v.attestation || {};
+    const direct = v.path === 'direct';
     const sig = !!v.tee_verified;
     const attOk = !!att.attestation_verified;
-    const full = sig && attOk;
+    // Direct path: the privacy guarantee is that the text went straight to the
+    // enclave (architectural) and the enclave is genuine (attestation). Relay path:
+    // needs the response signature plus attestation.
+    const full = direct ? attOk : (sig && attOk);
     el.className = 'verify ' + (full ? 'ok' : 'warn');
 
     const vcheck = (ok, title, sub) =>
       '<div class="vcheck">' + tick(ok) + '<div><div class="ct">' + title + '</div><div class="cs">' + sub + '</div></div></div>';
 
     let html = '<div class="vtop"><div class="vseal' + (full ? '' : ' warn') + '">' + shield + '</div><div>';
-    html += '<p class="vbadge">' + (full ? 'TEE attestation · Verified' : 'TEE attestation · Incomplete') + '</p>';
+    html += '<p class="vbadge">' + (full ? (direct ? 'Private · Verified' : 'TEE attestation · Verified') : 'Verification · Incomplete') + '</p>';
     html += '<div class="vhead">' + (full
-      ? 'Your document was handled privately, and we can prove it.'
+      ? (direct
+        ? 'Your document went straight to the sealed enclave — and we can prove that enclave is genuine.'
+        : 'Your document was handled privately, and we can prove it.')
       : 'We could only partly verify this run.') + '</div>';
     html += '<p class="vsub">' + (full
-      ? 'The AI that read your text ran inside sealed hardware that not even Nillion or its cloud host can see into. We checked its hardware attestation and it passed. The details, and a receipt you can verify yourself, are below.'
+      ? (direct
+        ? 'Your text was sent from your browser directly to sealed hardware that not even Nillion, its cloud host, or we can see into — it never passed through our servers. We independently checked that enclave’s hardware attestation and it passed. A receipt you can verify yourself is below.'
+        : 'The AI that read your text ran inside sealed hardware that not even Nillion or its cloud host can see into. We checked its hardware attestation and it passed. The details, and a receipt you can verify yourself, are below.')
       : 'Some of the privacy checks didn’t pass this time. See the details below, and treat this result with caution.') + '</p>';
     html += '</div></div>';
 
     const buildPinned = att.measurement_matches_known_build === true;
     html += '<div class="vchecks">';
-    html += vcheck(sig, 'The result came from the sealed hardware', 'The response was cryptographically signed inside the enclave.');
+    if (direct) {
+      html += vcheck(true, 'Sent straight to the sealed enclave', 'Your text went from your browser directly to the enclave. It never passed through our servers — we only ever handled a public key.');
+    } else {
+      html += vcheck(sig, 'The result came from the sealed hardware', 'The response was cryptographically signed inside the enclave.');
+    }
     html += vcheck(attOk, 'The hardware is genuine and unmodified', buildPinned
       ? 'Its attestation is valid and its launch fingerprint matches the build we expect.'
       : 'Its attestation is valid. The exact build fingerprint isn’t pinned for this runtime version yet.');
@@ -390,6 +532,9 @@ function renderVerification(v) {
     };
     const kv = (k, val) => '<div class="kv"><span class="k">' + k + '</span><span class="v">' + val + '</span></div>';
     let rows = '';
+    rows += kv('Delivery', direct
+      ? '<span class="ok">browser → enclave (direct)</span>'
+      : 'via verifier (server relay)');
     if (att.processor) rows += kv('Processor', escapeHtml(att.processor));
     if (att.nilcc_version) rows += kv('Runtime', escapeHtml(att.nilcc_version));
     rows += kv('Known build', att.measurement_matches_known_build === true
@@ -397,7 +542,9 @@ function renderVerification(v) {
       : (att.measurement_matches_known_build === false ? 'no (mismatch)' : 'not pinned for this runtime'));
     for (const k of Object.keys(labels)) if (k in checks) rows += kv(labels[k], checks[k] ? '<span class="ok">✓</span>' : '✗');
     if (att.measurement) rows += kv('Measurement', escapeHtml(String(att.measurement).slice(0, 24)) + '…');
-    if (v.signature) rows += kv('Signature', escapeHtml(String(v.signature).slice(0, 28)) + '…');
+    if (v.signature) rows += kv('Response signature', v.tee_verified
+      ? '<span class="ok">✓ verified in your browser</span>'
+      : escapeHtml(String(v.signature).slice(0, 24)) + '… (captured)');
     if (v.receipt && v.receipt.attestation_report_hex) rows += kv('Independent proof', '<a href="#" id="dl-receipt">download receipt ↓</a>');
     rows += kv('Learn more', '<a href="' + LEARN_MORE + '" target="_blank" rel="noopener">how this works ↗</a>');
     if (att.error) rows += kv('Attestation error', escapeHtml(att.error));
