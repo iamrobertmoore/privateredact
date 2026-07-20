@@ -59,7 +59,7 @@ const state = {
 
 /* ------------------------------------------------------------- categories */
 const RULES = {
-  email: { label: 'Email addresses', re: () => /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g },
+  email: { label: 'Email addresses', re: () => /\b[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,255}\.[A-Za-z]{2,24}\b/g }, // bounded to avoid O(n^2) backtracking on long non-email runs
   phone: { label: 'Phone numbers', re: () => /(?:\+?\d{1,3}[\s.\-]?)?(?:\(\d{2,4}\)[\s.\-]?|\d{2,4}[\s.\-]?)\d{3,4}[\s.\-]?\d{3,4}/g, min: 7 },
   ssn:   { label: 'US SSN', re: () => /\b\d{3}-\d{2}-\d{4}\b/g },
   card:  { label: 'Card numbers', re: () => /\b(?:\d[ \-]?){13,19}\b/g, luhn: true },
