@@ -9,6 +9,7 @@ import { DelegationTokenServer } from '@nillion/nilai-ts';
 const KEY = process.env.NILAI_DELEGATION_KEY || process.env.NILAI_API_KEY;
 const EXPIRY_SEC = parseInt(process.env.DELEGATION_TTL_SEC || '20', 10);
 const MAX_USES = parseInt(process.env.DELEGATION_MAX_USES || '1', 10);
+const ALLOW_EXT = process.env.ALLOW_EXTENSION_ORIGINS === 'true';
 
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGIN || '').split(',').map((s) => s.trim().replace(/\/+$/, '')).filter(Boolean);
 const CORS = { 'Access-Control-Allow-Origin': ALLOWED_ORIGINS[0] || '*', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
@@ -19,6 +20,7 @@ function originAllowed(event) {
   const h = event.headers || {};
   const origin = (h.origin || h.Origin || '').replace(/\/+$/, '');
   const referer = h.referer || h.Referer || '';
+  if (ALLOW_EXT && origin.startsWith('chrome-extension://')) return true;
   return ALLOWED_ORIGINS.some((a) => origin === a || referer === a || referer.startsWith(a + '/'));
 }
 

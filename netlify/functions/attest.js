@@ -16,6 +16,7 @@ const { verifyEnclaveAttestation } = require('../../server/nilai-verifier/attest
 const BASE = (process.env.NILAI_BASE_URL || 'https://api.nilai.nillion.network').replace(/\/+$/, '');
 
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGIN || '').split(',').map((s) => s.trim().replace(/\/+$/, '')).filter(Boolean);
+const ALLOW_EXT = process.env.ALLOW_EXTENSION_ORIGINS === 'true';
 const CORS = { 'Access-Control-Allow-Origin': ALLOWED_ORIGINS[0] || '*', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS' };
 const json = (statusCode, obj) => ({ statusCode, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify(obj) });
 
@@ -24,6 +25,7 @@ function originAllowed(event) {
   const h = event.headers || {};
   const origin = (h.origin || h.Origin || '').replace(/\/+$/, '');
   const referer = h.referer || h.Referer || '';
+  if (ALLOW_EXT && origin.startsWith('chrome-extension://')) return true;
   return ALLOWED_ORIGINS.some((a) => origin === a || referer === a || referer.startsWith(a + '/'));
 }
 
