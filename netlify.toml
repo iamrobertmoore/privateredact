@@ -107,6 +107,11 @@
   status = 404
   force = true
 [[redirects]]
+  from = "/PRIVATE_AI_HANDOVER.md"
+  to = "/404.html"
+  status = 404
+  force = true
+[[redirects]]
   from = "/package-lock.json"
   to = "/404.html"
   status = 404
