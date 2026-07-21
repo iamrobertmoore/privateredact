@@ -546,6 +546,37 @@ async function detect(useCache) {
 
 const LEARN_MORE = 'https://docs.nillion.com/build/private-llms/overview';
 
+function isIOS() {
+  const ua = navigator.userAgent || '';
+  // iPhone/iPad/iPod, plus iPadOS 13+ which reports as "Mac" but is touch-enabled.
+  return /iP(hone|ad|od)/.test(ua) || (/Macintosh/.test(ua) && typeof document !== 'undefined' && 'ontouchend' in document);
+}
+
+// Save a Blob to the user's device. Works cross-browser AND on iOS Safari, where the
+// <a download> attribute is ignored: prefer the native share sheet ("Save to Files")
+// when available, otherwise open the file in a new tab so the user can save it. The
+// old code created a detached <a download> and called .click(), which silently does
+// nothing on iOS — the cause of "the download button does nothing" reports.
+async function saveBlob(blob, filename) {
+  try {
+    const f = (typeof File === 'function') ? new File([blob], filename, { type: blob.type || 'application/octet-stream' }) : null;
+    if (f && navigator.canShare && navigator.canShare({ files: [f] })) {
+      await navigator.share({ files: [f], title: filename });
+      return;
+    }
+  } catch (e) { /* share cancelled/unsupported — fall through to a link download */ }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  if (isIOS()) a.target = '_blank'; // iOS ignores `download`; open it so the user can save via the share sheet
+  a.rel = 'noopener';
+  document.body.appendChild(a); // some browsers require the anchor to be in the DOM
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
 // Build and download a verification receipt: the raw AMD SEV-SNP attestation evidence,
 // which proves the enclave is genuine and can be checked independently against AMD.
 // It contains nothing about the user's document.
@@ -572,11 +603,7 @@ function downloadReceipt(v) {
     environment: r.environment || null,
     how_to_verify: 'This is an AMD SEV-SNP attestation report. Verify its certificate chain against AMD KDS (kdsintf.amd.com) and check the launch measurement. The verifier used here is open source: https://github.com/iamrobertmoore/privateredact (see server/nilai-verifier).',
   };
-  const blob = new Blob([JSON.stringify(receipt, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'privateredact-attestation-receipt.json'; a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1500);
+  saveBlob(new Blob([JSON.stringify(receipt, null, 2)], { type: 'application/json' }), 'privateredact-attestation-receipt.json');
 }
 
 function renderVerification(v) {
@@ -973,12 +1000,9 @@ function initButtons() {
     await refreshPreview();
   });
   document.getElementById('download').addEventListener('click', () => {
-    if (!state.currentBytes) return;
-    const url = URL.createObjectURL(new Blob([state.currentBytes], { type: 'application/pdf' }));
+    if (!state.currentBytes) { status('Nothing to download yet — adjust the redactions and wait for the preview to finish.', 'warn'); return; }
     const base = state.fileName.replace(/\.[^.]+$/, '') || 'document';
-    const a = document.createElement('a');
-    a.href = url; a.download = base + '-redacted.pdf'; a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    saveBlob(new Blob([state.currentBytes], { type: 'application/pdf' }), base + '-redacted.pdf');
   });
 }
 
