@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Privacy Policy | Private Redaction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="dot"></span>
+      <div>
+        <h1>Privacy Policy</h1>
+        <p class="tagline"><a href="index.html">← Back to Private Redaction</a></p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="card legal">
+      <p class="muted small">Last updated: 22 July 2026</p>
+
+      <p>This Privacy Policy explains how the Private Redaction website at privateredact.app and the
+      Private Redaction Chrome extension (together, "the Tool") handle information. In this policy,
+      "we", "us" and "our" refer to the operator of the Tool. Private Redaction is a free,
+      experimental tool that helps you black out ("redact") sensitive information in images,
+      screenshots, documents and text.</p>
+
+      <h2>1. The short version</h2>
+      <p>Your files, images and text are opened and redacted <strong>on your own device</strong>. We
+      do not run analytics or trackers inside the Chrome extension, we do not sell or share your
+      content, and we do not store your documents. When you use the optional private-AI detection,
+      only the <strong>extracted text</strong> is sent, straight from your browser to a sealed
+      Nillion enclave, to identify what to redact. It is not sent to us and is not retained.</p>
+
+      <h2>2. What the Tool processes on your device</h2>
+      <p>To redact an image, screenshot or text, the Tool reads the content you point it at (an image
+      you right-click, a region of a page you capture, or text you select) and produces the redacted
+      output locally in your browser. This content is held only in memory for the duration of the
+      task and is not transmitted to us. Optical character recognition (reading text out of images)
+      also runs locally, on your device.</p>
+
+      <h2>3. The optional private-AI detection</h2>
+      <p>If you turn on the AI categories (for example names, addresses or organisations), the Tool
+      sends only the <strong>text extracted</strong> from your content to a private-AI service
+      operated via Nillion, which is designed to process that text inside secured, hardware-isolated
+      ("sealed enclave") environments. On the default path this text goes <strong>directly from your
+      browser to the enclave</strong>: our own server issues only a short-lived access token derived
+      from a public key, and does not receive your text on that path. If the direct path is
+      unavailable, the Tool may fall back to relaying the text through our own stateless service,
+      which handles it only in transit to forward it and verify the result. The interface shows which
+      path was used for each run and offers a verifiable attestation receipt. We do not store this
+      text, and it is used only to return redaction suggestions for that request.</p>
+
+      <h2>4. Information we collect</h2>
+      <p>The Chrome extension contains <strong>no analytics, advertising, or tracking</strong>, and
+      does not send your document content, browsing history, or personal information to us. The
+      website uses privacy-respecting, cookieless aggregate analytics (Cloudflare Web Analytics) to
+      count visits; this does not identify you and does not involve your document content. We do not
+      build profiles of users and we do not sell or rent any information.</p>
+
+      <h2>5. Permissions the extension uses, and why</h2>
+      <p>The Chrome extension requests only the permissions needed to do its job: context menus (to
+      add the right-click "Redact this image" and "Redact selected text" entries); active tab and
+      scripting (only when you click the toolbar button or a menu item, to capture the region or read
+      the image you chose); storage (to hand the captured content to the redaction workspace within
+      your browser); clipboard write (so you can copy the redacted result); and access to
+      privateredact.app and the Nillion API (used only for the optional private-AI detection described
+      above). The extension does not read or collect the pages you browse.</p>
+
+      <h2>6. Data retention and security</h2>
+      <p>Because redaction happens on your device and we do not receive your content on the default
+      path, we hold no copies of your documents, images or extracted text. Any text handled by the
+      relay fallback is processed only in transit and is not stored. The connection to the enclave is
+      encrypted, and the enclave's genuineness can be independently verified via the attestation
+      receipt the Tool provides.</p>
+
+      <h2>7. Third parties</h2>
+      <p>The private-AI detection relies on Nillion's infrastructure to process extracted text inside
+      sealed hardware. Nillion's handling of that text is governed by Nillion's own terms and
+      technology. The website is hosted on Netlify and uses Cloudflare Web Analytics as described
+      above. We do not share your content with any other third parties.</p>
+
+      <h2>8. Children</h2>
+      <p>The Tool is not directed to children and is intended for general, professional and personal
+      use by adults.</p>
+
+      <h2>9. Your choices</h2>
+      <p>The manual redaction and the local pattern rules work with no network access at all; you can
+      redact entirely offline by leaving the AI categories switched off. You control what content you
+      point the Tool at and what you download or copy.</p>
+
+      <h2>10. Changes</h2>
+      <p>We may update this policy as the Tool evolves. Changes take effect when posted here, and the
+      "last updated" date above will change. Material changes to how data is handled will be reflected
+      in this policy and, where relevant, in the extension's Chrome Web Store data disclosures.</p>
+
+      <h2>11. Contact</h2>
+      <p>Questions about this policy, or requests relating to any data you believe we hold, can be
+      raised via the Tool's public code repository at
+      <a href="https://github.com/iamrobertmoore/privateredact" target="_blank" rel="noopener">github.com/iamrobertmoore/privateredact</a>.
+      This Privacy Policy should be read together with our
+      <a href="terms.html">Terms of Use</a>.</p>
+
+      <p class="muted small"><a href="index.html">← Back to Private Redaction</a></p>
+    </section>
+  </main>
+</body>
+</html>
