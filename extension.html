@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Private Redaction for Chrome: redact images, screenshots and text in your browser</title>
+  <meta name="description" content="A free Chrome extension to black out sensitive info in any image, screenshot or selected text. Redaction runs on your device, nothing is uploaded, and the optional private-AI detection is hardware-verified." />
+  <link rel="canonical" href="https://privateredact.app/extension" />
+  <meta name="theme-color" content="#080B14" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Private Redaction" />
+  <meta property="og:title" content="Private Redaction for Chrome" />
+  <meta property="og:description" content="Black out sensitive info in any image, screenshot or selected text, right in your browser. On-device, nothing uploaded, with a verifiable private-AI assist." />
+  <meta property="og:url" content="https://privateredact.app/extension" />
+  <meta property="og:image" content="https://privateredact.app/img/ext-detect.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Private Redaction for Chrome" />
+  <meta name="twitter:description" content="Redact images, screenshots and text in your browser. On-device, nothing uploaded, verifiable private-AI assist." />
+  <meta name="twitter:image" content="https://privateredact.app/img/ext-detect.png" />
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"Private Redaction for Chrome","operatingSystem":"Chrome, Microsoft Edge, Brave","applicationCategory":"BrowserApplication","description":"Free Chrome extension to black out sensitive information in images, screenshots and text. Redaction and text recognition run on the user's device; the optional private-AI detection runs in a hardware-verified Nillion enclave.","url":"https://privateredact.app/extension","downloadUrl":"https://chromewebstore.google.com/detail/private-redaction/eldnppgbnlankgbnoblonninllhcpkbm","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Organization","name":"Private Redaction"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"Is the extension free?","acceptedAnswer":{"@type":"Answer","text":"Yes. Private Redaction for Chrome is free and open source."}},
+    {"@type":"Question","name":"Does my image or screenshot get uploaded?","acceptedAnswer":{"@type":"Answer","text":"No. Redaction and on-device text recognition happen entirely in your browser. Only if you use the AI categories is the extracted text sent, straight from your browser to a sealed hardware enclave, never to our servers, and it is not stored."}},
+    {"@type":"Question","name":"What can it redact?","acceptedAnswer":{"@type":"Answer","text":"Any image or screenshot, a dragged region of any page, or selected text. It detects emails, phone, card and account numbers, IBANs and more with on-device rules, plus names, addresses and organisations via the private AI. You can also black out anything by hand."}},
+    {"@type":"Question","name":"Is the redaction permanent?","acceptedAnswer":{"@type":"Answer","text":"Yes. The output is a flattened image: the covered pixels are removed, not just hidden, so the underlying content cannot be recovered."}},
+    {"@type":"Question","name":"Which browsers are supported?","acceptedAnswer":{"@type":"Answer","text":"Google Chrome and Chromium-based browsers such as Microsoft Edge and Brave."}}
+  ]}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <a href="/" class="brand-mark">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="wordmark">Private Redaction</span>
+      </a>
+      <nav class="topnav"><a href="/">Redact</a> <a href="/extension">Browser Extension</a> <a href="/blog/">Blog</a> <a href="https://github.com/iamrobertmoore/privateredact" target="_blank" rel="noopener">GitHub</a></nav>
+    </div>
+  </header>
+
+  <main>
+    <article class="prose">
+      <img class="hero-icon" src="/img/ext-icon.png" alt="Private Redaction icon" width="60" height="60" />
+      <p class="meta">Browser extension</p>
+      <h1>Private Redaction for Chrome</h1>
+      <p class="lede">Black out sensitive information in any image, screenshot or selected text, right where you are. Redaction happens on your device, nothing is uploaded, and the optional private-AI detection is hardware-verified.</p>
+      <div class="cta-row">
+        <a class="btn primary" href="https://chromewebstore.google.com/detail/private-redaction/eldnppgbnlankgbnoblonninllhcpkbm" target="_blank" rel="noopener"><img class="chrome-ic" src="/img/chrome-logo.svg" alt="" /> Add to Chrome</a>
+        <a class="btn ghost" href="/">Or use the web app &rarr;</a>
+      </div>
+    </article>
+
+    <section class="card">
+      <h2 style="margin-top:0">Three ways to redact</h2>
+      <p class="muted">Every flow opens a private workspace where you can auto-detect sensitive items, black out anything by hand, and copy or download the result.</p>
+      <div class="ext-steps">
+        <div>
+          <h3>Right-click an image</h3>
+          <p>On any image or screenshot, choose <strong>Redact this image</strong>. It reads the text on-device and blacks out what it finds.</p>
+        </div>
+        <div>
+          <h3>Grab a region of the page</h3>
+          <p>Click the toolbar icon and <strong>drag a rectangle</strong> over anything, a bank balance, an order, a chat, and redact just that.</p>
+        </div>
+        <div>
+          <h3>Right-click selected text</h3>
+          <p>Highlight text and choose <strong>Redact selected text</strong> to get a cleaned version you can copy.</p>
+        </div>
+        <div>
+          <h3>Black out anything by hand</h3>
+          <p>Drag on the image to cover anything the detector missed, and tap a box to remove it. You are always in control.</p>
+        </div>
+      </div>
+      <img class="shot" src="/img/ext-menu.png" alt="Right-clicking an image in Chrome and choosing Redact this image" loading="lazy" />
+      <img class="shot" src="/img/ext-region.png" alt="Dragging to select a region of a web page to redact" loading="lazy" />
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">It finds the sensitive bits for you</h2>
+      <p>Auto-detect covers emails, phone, card and account numbers, IBANs and more with rules that run entirely on your device, plus names, addresses and organisations via the private AI. Review every item in a checklist and untick anything you want to keep.</p>
+      <img class="shot" src="/img/ext-detect.png" alt="An onboarding form with sensitive fields automatically blacked out, and a Private, Verified panel" loading="lazy" />
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">Private by design</h2>
+      <ul class="ext-priv">
+        <li>Your image or text is opened and blacked out <strong>on your device</strong>. It is never uploaded to us.</li>
+        <li>Manual redaction and the on-device rules need <strong>no network at all</strong>.</li>
+        <li>When you use the AI categories, only the extracted <strong>text</strong> is sent, straight from your browser to a sealed <a href="https://docs.nillion.com/build/private-llms/overview" target="_blank" rel="noopener">Nillion enclave</a>, not through our servers.</li>
+        <li>The output is a <strong>flattened image</strong>: the covered pixels are gone, not hidden.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">A verifiable private AI</h2>
+      <p>When the AI reads your text, the extension independently checks the enclave's own hardware attestation and shows you the result, with a receipt you can verify yourself. You do not have to take our word for it.</p>
+      <img class="shot" src="/img/ext-verify.png" alt="The verification panel showing browser to enclave direct delivery and passing attestation checks" loading="lazy" />
+    </section>
+
+    <section class="prose">
+      <h2>Questions</h2>
+      <h3>Is it free?</h3>
+      <p>Yes, and it is open source. You can read the code on <a href="https://github.com/iamrobertmoore/privateredact" target="_blank" rel="noopener">GitHub</a>.</p>
+      <h3>Does my image get uploaded?</h3>
+      <p>No. Redaction and text recognition run in your browser. Only the AI categories send the extracted text, and it goes straight to the sealed enclave, not to us, and is not stored.</p>
+      <h3>What can it redact?</h3>
+      <p>Any image or screenshot, a dragged region of a page, or selected text, covering emails, phone, card and account numbers, IBANs, and names, addresses and organisations. You can also black out anything by hand.</p>
+      <h3>Is the redaction permanent?</h3>
+      <p>Yes. The result is a flattened image, so the covered content cannot be recovered.</p>
+      <h3>Which browsers work?</h3>
+      <p>Google Chrome and Chromium-based browsers such as Microsoft Edge and Brave.</p>
+
+      <p class="cta">Ready to try it? <a href="https://chromewebstore.google.com/detail/private-redaction/eldnppgbnlankgbnoblonninllhcpkbm" target="_blank" rel="noopener">Add Private Redaction to Chrome</a>, or <a href="/">redact a document in the web app</a>. Prefer to read first? See <a href="/blog/how-to-redact-a-pdf-properly">how to redact properly</a>.</p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="foot-brand"><span class="dot" style="width:16px;height:16px;border-radius:4px"></span> Private Redaction</div>
+    <p>Provided "as is", without warranty, as an experimental tool. By using it you agree to the <a href="/terms.html" target="_blank" rel="noopener">Terms of Use</a> and <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>. Processing is local; the optional AI detection runs privately in a Nillion secure enclave.</p>
+  </footer>
+
+  <!-- Cloudflare Web Analytics -->
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cea12a25aa994f2a81275b641a949553"}'></script>
+</body>
+</html>

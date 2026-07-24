@@ -257,3 +257,40 @@ input[type=text]:focus{outline:none; border-color:var(--accent); box-shadow:0 0 
 @media(prefers-reduced-motion:reduce){
   .redact-line .redact-bar{animation:none; clip-path:inset(0 0 0 100%)}
 }
+
+/* ---- chrome extension callout (home) + screenshot images ---- */
+.ext-band{max-width:820px; margin:22px auto 0; display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap; padding:15px 20px; border:1px solid rgba(110,151,255,.28); border-radius:var(--radius); background:linear-gradient(180deg, rgba(77,159,255,.09), rgba(77,159,255,.025))}
+.ext-band-txt{display:flex; align-items:center; gap:12px; min-width:250px; flex:1}
+.ext-band-badge{font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); border:1px solid rgba(110,151,255,.4); border-radius:999px; padding:3px 9px; flex:none}
+.ext-band-txt strong{color:var(--ink); display:block; font-size:14.5px}
+.ext-band-txt .muted{font-size:13px; color:var(--fog); display:block; margin-top:2px}
+.ext-band-cta{display:flex; align-items:center; gap:16px; flex:none}
+.ext-band-cta .btn.primary{margin-top:0}
+.ext-band-more{color:var(--accent); font-weight:600; font-size:14px; text-decoration:none; white-space:nowrap}
+.ext-band-more:hover{text-decoration:underline}
+@media(max-width:640px){ .ext-band{flex-direction:column; align-items:flex-start} }
+.shot{width:100%; height:auto; border:1px solid var(--hair); border-radius:var(--radius); display:block; margin:14px 0; box-shadow:0 20px 44px -30px rgba(0,0,0,.85)}
+.ext-steps{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:18px 0}
+@media(max-width:640px){ .ext-steps{grid-template-columns:1fr} }
+.ext-priv{margin:14px 0 0; padding-left:20px; color:var(--ink-soft); display:grid; gap:9px; line-height:1.55}
+.ext-priv strong{color:var(--ink)}
+.ext-priv a{color:var(--accent)}
+.card h2{font-size:20px; font-weight:700; letter-spacing:-.01em; color:var(--ink)}
+.card h3{font-size:15px; font-weight:700; color:var(--ink); margin:0 0 4px}
+.card .ext-steps p{color:var(--ink-soft); margin:0; font-size:14px; line-height:1.5}
+
+/* ---- refined extension callout + CTA buttons (overrides above) ---- */
+.ext-band{max-width:820px; margin:24px auto 0; display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding:16px 20px; border:1px solid rgba(110,151,255,.28); border-radius:var(--radius); background:linear-gradient(180deg, rgba(77,159,255,.09), rgba(77,159,255,.025))}
+.ext-band-icon{width:46px; height:46px; border-radius:11px; flex:none; box-shadow:0 0 0 1px var(--hair)}
+.ext-band-txt{flex:1; min-width:220px; display:block}
+.ext-band-txt strong{color:var(--ink); display:block; font-size:15px}
+.ext-band-txt .muted{font-size:13px; color:var(--fog); display:block; margin-top:3px; line-height:1.5}
+.ext-band-cta{display:flex; align-items:center; gap:16px; flex:none}
+.ext-band-cta .btn.primary{margin-top:0}
+.ext-band-more{color:var(--accent); font-weight:600; font-size:14px; text-decoration:none; white-space:nowrap}
+.ext-band-more:hover{text-decoration:underline}
+@media(max-width:700px){ .ext-band{flex-direction:column; align-items:flex-start} .ext-band-cta{width:100%} }
+.chrome-ic{width:18px; height:18px; flex:none}
+.cta-row{display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:24px 0 0}
+.cta-row .btn{margin-top:0}
+.hero-icon{width:60px; height:60px; border-radius:14px; display:block; margin-bottom:16px; box-shadow:0 0 0 1px var(--hair)}
